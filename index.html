@@ -60,7 +60,7 @@
         <h3>Proposta de Regras para Bolsas de Monitoria do CCA/UFSCar</h3>
         <p><b>Atenção: </b> este conjunto de regras é uma proposta que encontra-se em análise e, portanto, não possui ainda qualquer valor legal.</p>
         <ol>
-            <li>O edital de seleção elaborado pela Comissão de Bolsas de Monitoria do CCA/UFSCar (CBM-CCA) será lançado com uma semana de antecedência à data de início das aulas e terá o prazo de três dias após o início das aulas.</li>
+            <li>O edital de seleção será elaborado pela Comissão de Bolsas de Monitoria do CCA/UFSCar (CBM-CCA) e deverá respeitar os critérios estebelecidos neste documento.</li>
 
             <li>Pelo edital, os docentes deverão enviar uma solicitação para cada turma. Não há limitação de solicitações de bolsas por docente ou por turma.</li>
 
@@ -75,7 +75,7 @@
                     
                     <li>Caso \(N_{S_{max}} > 1\), cada turma que contenha a solicitação de \(N_{S_{max}}\) terá a sua solicitação reduzida em 1 (uma) bolsa. Essas reduções produzirão um número total de bolsas solicitadas reduzidas, que chamaremos de \(B_{SR}\). Caso \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo. Caso contrário, verifica-se qual é o \(N_{SR_{max}}\) das solicitações reduzidas e aplica-se o procedimento do início deste item. Esse procedimento é repetido até que \(B_{SR} \leq B_{D}\).</li>
                     
-                    <li>Caso todas as solicitações reduzidas contemplem pelo menos uma bolsa por turma e \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo.</li>
+                    <li>Caso todas as solicitações reduzidas contemplem pelo menos uma bolsa por turma e \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo.</li>                    
                     
                     <li>Caso \(B_{SR} > B_{D}\), calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico ao definido no documento <em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em> ou em documento mais atualizado. Aquele procedimento define que:
                         $$ P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T} $$
@@ -91,11 +91,16 @@
                     No caso da resolução COG 316-10/02/20, como últimos 5 anos foram considerados os anos de 2014 a 2018. Além disso, naquela resolução, acordou-se que "para avaliar os números acima, não seriam consideradas as ACIEPEs, atividades de estágio, projeto e monografia, atividades na modalidade EAD e atividades normalmente contempladas pelo Programa de Tutoria". Todas essas decisões também serão adotadas para o cálculo de cada \(P_{i}\) do CCA.
                     </li>
 
-                    <li>Define-se \(B_{G_i}\) como sendo a quantidade mínima de bolsas garantida para o \(i\)-ésimo departamento, calculado por:
+                    <li>Define-se \(B_{G_i}\) como sendo a quantidade mínima de bolsas garantidas para o \(i\)-ésimo departamento, calculado por:
                         \begin{equation}
                             B_{G_i} = P_{i}B_{D}
                         \end{equation}
                     </li>
+
+                    <li>O \(i\)-ésimo departamento que apresentar, simultaneamente, \(B_{G_i} < 1\) e \(B_{SR_i} \geq 1\) terá o seu peso recalculado para \(P_{i} = 1/B_{D}\)
+                        
+                        
+                        terá a sua quantidade mínima de bolsas garantidas corrigida para \(B_{G_i} = 1\).</li>
 
                     <li>Define-se \(B_{D_i}\) como sendo a quantidade de bolsas disponibilizadas ao \(i\)-ésimo departamento, em que, consequentemente \(B_{D}=\sum_{i}B_{D_i}\).</li>
 
@@ -103,10 +108,12 @@
                         \begin{equation}
                             \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}
                         \end{equation}                                    
-                    respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso \(B_{SR_i} \leq B_{G_i}\).            
+                    respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso: \(B_{SR_i} \leq B_{G_i}\).            
                     </li>
 
-                    <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, privilegiar-se-a o conjunto \(B_{D_i}\) que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre um único conjunto \(B_{D_i}\).</li>
+                    <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, privilegiar-se-a o conjunto \(B_{D_i}\) que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre um único conjunto \(B_{D_i}\). Essa ordem só pode ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos 1 (uma) solicitação de bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>   
+                    
+                    <li>Caso \(B_{D}\) seja menor ou igual ao número de departamentos solicitantes de bolsas, então as bolsas serão distribuídas igualitariamente entre os departamentos solicitantes respeitando as regras de desempate do item anterior.</li>
 
                     <li>Casos omissos serão deliberados pela CBM-CCA.</li>
                     
@@ -191,44 +198,69 @@
             depGrants = [];
             tots['Pi'] = 0;
             tots['BSRi'] = 0;
-            tots['BDi'] = Number(document.getElementById('BD').value);                        
+            tots['BDi'] = Number(document.getElementById('BD').value);
+            Dsolics = 0;                        
             for (let name of ['Pi', 'BSRi']) {
                 for (let x of document.getElementsByName(name)) {                    
                     let v = Number(x.value.replace(',', '.'));
                     Deps[x.getAttribute('id').split('_')[1]][name] = v;
                     tots[name] += v;            
+                    if (name == 'BSRi' && v > 0) Dsolics++;
                 }
             }    
-            
-            for (let dep in Deps) Deps[dep]['min'] = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
-                        
-            if (tots['BDi'] >= tots['BSRi']) {
-                let grant = [];
-                for (let dep in Deps) grant.push(Number(document.getElementById('BSRi_' + dep).value));
-                depGrants.push({'dev': 0, 'grant': grant});
-            }
-            else genDepGrants([], 0, 0);            
 
-            let depGrantsSorted = depGrants.sort((a, b) => {
-                if (a['dev'] > b['dev']) return 1;
-                else if (a['dev'] < b['dev']) return -1;
-                else return 0;
-            });
-                        
-            let minDepGrants = [];
-            for (let grant of depGrantsSorted) {
-                if (grant['dev'] == depGrantsSorted[0]['dev']) minDepGrants.push(grant);
-                else break;
+            if (Dsolics >= tots['BDi']) {
+                let i = 0;
+                for (let dep in Deps) document.getElementById('BDi_' + dep).innerHTML = '';
+                alert('Atenção: o número de departamentos solicitantes de bolsas é maior que o número de bolsas disponíveis. Vide as regras para esse caso.')
             }
+            else {
+                for (let dep in Deps) {
+                    let min = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
+                    if ((Deps[dep]['BSRi'] >= 1) && (min < 1)) Deps[dep]['min'] = 1;
+                    else Deps[dep]['min'] = min;
+                }
+                /*for (let dep in Deps) {
+                    let min = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
+                    if ((Deps[dep]['BSRi'] > 0) && (min < 1)) Deps[dep]['Pi'] = 1/tots['BDi'];
+                }
+                tots['Pi'] = 0;
+                for (let dep in Deps) tots['Pi'] += Deps[dep]['Pi'];
+                for (let dep in Deps) Deps[dep]['min'] = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];*/
+
+
+                if (tots['BDi'] >= tots['BSRi']) {
+                    let grant = [];
+                    for (let dep in Deps) grant.push(Number(document.getElementById('BSRi_' + dep).value));
+                    depGrants.push({'dev': 0, 'grant': grant});
+                }
+                else genDepGrants([], 0, 0);            
+
+                /*for (let grant of depGrants) {
+                    for (let i = 0; i < grant['grant'].length; i++)
+                }*/
+
+                let depGrantsSorted = depGrants.sort((a, b) => {
+                    if (a['dev'] > b['dev']) return 1;
+                    else if (a['dev'] < b['dev']) return -1;
+                    else return 0;
+                });
+                            
+                let minDepGrants = [];
+                for (let grant of depGrantsSorted) {
+                    if (grant['dev'] == depGrantsSorted[0]['dev']) minDepGrants.push(grant);
+                    else break;
+                }
+                
+                let i = 0;
+                for (let dep in Deps) { 
+                    let grantString = '';                
+                    for (let grant of minDepGrants) grantString += grant['grant'][i] + ' <br>';
+                    document.getElementById('BDi_' + dep).innerHTML = grantString;
+                    i++;
+                }
             
-            let i = 0;
-            for (let dep in Deps) { 
-                let grantString = '';                
-                for (let grant of minDepGrants) grantString += grant['grant'][i] + ' <br>';
-                document.getElementById('BDi_' + dep).innerHTML = grantString;
-                i++;
             }
-           
         }      
                 
         function genDepGrants (perm, sa, sb) {
@@ -269,9 +301,8 @@
             let item;
             let penal = 1000;            
             for (let dep in Deps) {
-                if ((Deps[dep]['BSRi'] <= Deps[dep]['min']) && (grant[i] != Deps[dep]['BSRi'])) item = penal;
-                else item = (grant[i] - Deps[dep]['min'])**2;                
-                dev += item;
+                if ((Deps[dep]['BSRi'] <= Deps[dep]['min']) && (grant[i] != Deps[dep]['BSRi']) /*&& (tots['BDi'] >= tots['BSRi'])*/ /*&& (Deps[dep]['min'] >= 1)*/) return penal;
+                else dev += (grant[i] - Deps[dep]['min'])**2;                                
                 i++;
             }
             return dev;
