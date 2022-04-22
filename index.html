@@ -194,7 +194,7 @@
             tots['BDi'] = Number(document.getElementById('BD').value);                        
             for (let name of ['Pi', 'BSRi']) {
                 for (let x of document.getElementsByName(name)) {                    
-                    let v = Number(x.value);
+                    let v = Number(x.value.replace(',', '.'));
                     Deps[x.getAttribute('id').split('_')[1]][name] = v;
                     tots[name] += v;            
                 }
