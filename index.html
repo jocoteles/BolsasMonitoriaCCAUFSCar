@@ -108,7 +108,7 @@
                     respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso: \(B_{SR_i} \leq B_{G_i}\).            
                     </li>
 
-                    <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, privilegiar-se-a o conjunto \(B_{D_i}\) que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre um único conjunto \(B_{D_i}\). Essa ordem só pode ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos 1 (uma) solicitação de bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>   
+                    <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, privilegiar-se-a o conjunto \(B_{D_i}\) que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre um único conjunto \(B_{D_i}\). Essa ordem só pode ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos a solicitação de 1 (uma) bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>   
                     
                     <li>Caso \(B_{D}\) seja menor ou igual ao número de departamentos solicitantes de bolsas, então as bolsas serão distribuídas igualitariamente entre os departamentos solicitantes respeitando as regras de desempate do item anterior.</li>
 
@@ -206,7 +206,7 @@
                 }
             }    
 
-            if (Dsolics >= tots['BDi']) {
+            if (Dsolics > tots['BDi']) {
                 let i = 0;
                 for (let dep in Deps) document.getElementById('BDi_' + dep).innerHTML = '';
                 alert('Atenção: o número de departamentos solicitantes de bolsas é maior que o número de bolsas disponíveis. Vide as regras para esse caso.')
@@ -244,8 +244,9 @@
                 });
                             
                 let minDepGrants = [];
+                const epsilon = 1e-6;
                 for (let grant of depGrantsSorted) {
-                    if (grant['dev'] == depGrantsSorted[0]['dev']) minDepGrants.push(grant);
+                    if (Math.abs(grant['dev'] - depGrantsSorted[0]['dev']) < epsilon) minDepGrants.push(grant);
                     else break;
                 }
                 
@@ -255,23 +256,24 @@
                     for (let grant of minDepGrants) grantString += grant['grant'][i] + ' <br>';
                     document.getElementById('BDi_' + dep).innerHTML = grantString;
                     i++;
-                }
-            
+                }                
             }
         }      
                 
         function genDepGrants (perm, sa, sb) {
-            if (sa < tots['BDi']) {
-                let permN = perm.slice(0, perm.length); //just a perm copy
-                permN.push('a');
-                genDepGrants(permN, sa + 1, sb);
+            if ((sa + sb) < (tots['BDi'] + totDeps - 1)) {                
+                if (sa < tots['BDi']) {                   
+                    let permN = perm.slice(0, perm.length); //just a perm copy 
+                    permN.push('a');
+                    genDepGrants(permN, sa + 1, sb);
+                }
+                if (sb < totDeps - 1) {                    
+                    let permN = perm.slice(0, perm.length); //just a perm copy
+                    permN.push('b');                
+                    genDepGrants(permN, sa, sb + 1);
+                }
             }
-            if (sb < (totDeps - 1)) {
-                let permN = perm.slice(0, perm.length); //just a perm copy
-                permN.push('b');                
-                genDepGrants(permN, sa, sb + 1);
-            }
-            if ((sa + sb) == (tots['BDi'] + totDeps - 1)) {
+            else {
                 let grant = permsToGrants(perm);
                 let dev = stdDev(grant);
                 depGrants.push({'dev': dev, 'grant': grant});
@@ -279,17 +281,17 @@
         }            
         
         function permsToGrants (perm) {
-            ary = [];
+            let grant = [];
             let s = 0;
             for (let i = 0; i < perm.length; i++) {                
                 if (perm[i] == 'a') s += 1;
                 else {
-                    ary.push(s);
+                    grant.push(s);
                     s = 0;                    
                 }                
             }
-            ary.push(s);
-            return(ary);
+            grant.push(s);
+            return(grant);
         }
 
         function stdDev (grant) {            
@@ -303,7 +305,7 @@
                 i++;
             }
             return dev;
-        }
+        }        
                 
     </script>
 
