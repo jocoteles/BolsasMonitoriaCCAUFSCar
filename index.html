@@ -75,42 +75,52 @@
                     
                     <li>Caso \(N_{S_{max}} > 1\), cada turma que contenha a solicitação de \(N_{S_{max}}\) terá a sua solicitação reduzida em 1 (uma) bolsa. Essas reduções produzirão um número total de bolsas solicitadas reduzidas, que chamaremos de \(B_{SR}\). Caso \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo. Caso contrário, verifica-se qual é o \(N_{SR_{max}}\) das solicitações reduzidas e aplica-se o procedimento do início deste item. Esse procedimento é repetido até que \(B_{SR} \leq B_{D}\).</li>
                     
-                    <li>Caso todas as solicitações reduzidas contemplem pelo menos uma bolsa por turma e \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo.</li>                    
+                    <li>Caso todas as solicitações reduzidas contemplem pelo menos uma bolsa por turma e \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo.</li>            
+
+                    <li>Chamaremos de \(N_{D_S}\) o número de departamentos que estejam solicitando 1 (uma) ou mais bolsas.</li>
                     
-                    <li>Caso \(B_{SR} > B_{D}\), calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico ao definido no documento <em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em> ou em documento mais atualizado. Aquele procedimento define que:
-                        $$ P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T} $$
-                    em que:
-                    <ul>
-                        <li>\(P_{T} = \sum_{i}(Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i})\) é o fator de normalização.</li>
-                        <li>\(Q_{I_i}\) é a quantidade de inscrições em atividades no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                        <li>\(Q_{R_i}\) é a quantidade de reprovações no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                        <li>\(Q_{T_i}\) é a quantidade de créditos teóricos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                        <li>\(Q_{P_i}\) é a quantidade de créditos práticos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                        <li>\(N_{T_i}\) é a quantidade de turmas ofertadas pelo \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                    </ul>
-                    No caso da resolução COG 316-10/02/20, como últimos 5 anos foram considerados os anos de 2014 a 2018. Além disso, naquela resolução, acordou-se que "para avaliar os números acima, não seriam consideradas as ACIEPEs, atividades de estágio, projeto e monografia, atividades na modalidade EAD e atividades normalmente contempladas pelo Programa de Tutoria". Todas essas decisões também serão adotadas para o cálculo de cada \(P_{i}\) do CCA.
-                    </li>
-
-                    <li>Define-se \(B_{G_i}\) como sendo a quantidade mínima de bolsas garantidas para o \(i\)-ésimo departamento, calculado por:
-                        \begin{equation}
-                            B_{G_i} = P_{i}B_{D}
-                        \end{equation}
-                    </li>
-
-                    <li>O \(i\)-ésimo departamento que apresentar, simultaneamente, \(B_{G_i} < 1\) e \(B_{SR_i} \geq 1\) terá a sua quantidade mínima de bolsas garantidas corrigida para \(B_{G_i} = 1\).</li>
-
-                    <li>Define-se \(B_{D_i}\) como sendo a quantidade de bolsas disponibilizadas ao \(i\)-ésimo departamento, em que, consequentemente \(B_{D}=\sum_{i}B_{D_i}\).</li>
-
-                    <li>A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática \(\sigma^2\) entre o número de bolsas disponibilizadas para o \(i\)-ésimo departamento e \(B_{G_i}\):
-                        \begin{equation}
-                            \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}
-                        \end{equation}                                    
-                    respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso: \(B_{SR_i} \leq B_{G_i}\).            
-                    </li>
-
-                    <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, privilegiar-se-a o conjunto \(B_{D_i}\) que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre um único conjunto \(B_{D_i}\). Essa ordem só pode ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos a solicitação de 1 (uma) bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>   
+                    <li>Caso \(B_{SR} > B_{D}\) e \(N_{D_S} > B_{D}\), então as bolsas serão distribuídas seguindo os critérios de desempate especificados no item <a href="#tiebreaker">Critérios de desempate</a>.</li>                    
                     
-                    <li>Caso \(B_{D}\) seja menor ou igual ao número de departamentos solicitantes de bolsas, então as bolsas serão distribuídas igualitariamente entre os departamentos solicitantes respeitando as regras de desempate do item anterior.</li>
+                    <li>Caso \(B_{SR} > B_{D}\) e \(N_{D_S} \leq B_{D}\) segue-se o processo a seguir:
+                        <ol>
+                            <li>Calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico ao definido no documento <em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em> ou em documento mais atualizado. Aquele procedimento define que:
+                                \begin{equation}
+                                    P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T}
+                                \end{equation}
+                            em que:
+                            <ul>
+                                <li>\(P_{T} = \sum_{i}(Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i})\) é o fator de normalização.</li>
+                                <li>\(Q_{I_i}\) é a quantidade de inscrições em atividades no \(i\)-ésimo departamento nos últimos 5 anos.</li>
+                                <li>\(Q_{R_i}\) é a quantidade de reprovações no \(i\)-ésimo departamento nos últimos 5 anos.</li>
+                                <li>\(Q_{T_i}\) é a quantidade de créditos teóricos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
+                                <li>\(Q_{P_i}\) é a quantidade de créditos práticos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
+                                <li>\(N_{T_i}\) é a quantidade de turmas ofertadas pelo \(i\)-ésimo departamento nos últimos 5 anos.</li>
+                            </ul>
+                            No caso da resolução COG 316-10/02/20, como últimos 5 anos foram considerados os anos de 2014 a 2018. Além disso, naquela resolução, acordou-se que "para avaliar os números acima, não seriam consideradas as ACIEPEs, atividades de estágio, projeto e monografia, atividades na modalidade EAD e atividades normalmente contempladas pelo Programa de Tutoria". Todas essas decisões também serão adotadas para o cálculo de cada \(P_{i}\) do CCA.
+                            </li>
+        
+                            <li>Define-se \(B_{G_i}\) como sendo a quantidade mínima de bolsas garantidas para o \(i\)-ésimo departamento, calculado por:
+                                \begin{equation}
+                                    B_{G_i} = P_{i}B_{D}
+                                \end{equation}
+                            </li>
+        
+                            <li>O \(i\)-ésimo departamento que apresentar, simultaneamente, \(B_{G_i} < 1\) e \(B_{SR_i} \geq 1\) terá a sua quantidade mínima de bolsas garantidas corrigida para \(B_{G_i} = 1\).</li>
+        
+                            <li>Define-se \(B_{D_i}\) como sendo a quantidade de bolsas disponibilizadas ao \(i\)-ésimo departamento, em que, consequentemente \(B_{D}=\sum_{i}B_{D_i}\).</li>
+        
+                            <li>A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática \(\sigma^2\) entre o número de bolsas disponibilizadas para o \(i\)-ésimo departamento e \(B_{G_i}\):
+                                \begin{equation}
+                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}
+                                \end{equation}                                    
+                            respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso: \(B_{SR_i} \leq B_{G_i}\).            
+                            </li>
+        
+                            <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, deverão ser aplicados os critérios de desempate especificados no item <a href="#tiebreaker">Critérios de desempate</a>.</li>
+                        </ol>
+                    </li>                       
+                    
+                    <li><b id="tiebreaker">Critérios de desempate</b>: privilegiar-se-á a distribuição de bolsas que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre uma única distribuição de bolsas. Essa ordem somente deverá ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos a solicitação de 1 (uma) bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>
 
                     <li>Casos omissos serão deliberados pela CBM-CCA.</li>
                     
@@ -135,7 +145,7 @@
             <li>Clique no botão <b>Calcular distribuição de bolsas</b>. As bolsas a serem distribuídas serão informadas ao lado do rótulo \(B_{D_i}\). Caso haja mais que um conjunto \(B_{D_i}\) que resulte no mesmo \(\sigma^2\) mínimo, os conjuntos serão apresentados um abaixo do outro em ordem arbitrária.</li>
         </ul>
         <div>
-            <p><label for="BD">Bolsas disponíveis (\(B_{D}\)): </label><input type="text" id="BD"></p>
+            <p><label for="BD">Bolsas disponíveis (\(B_{D}\)): </label><input type="text" id="BD" value="5"></p>
         </div>
         <div>
             <table>
@@ -173,7 +183,7 @@
                 </tr>
                 </table>
         </div>    
-        <button onclick="calcDist()">Calcular distribuição de bolsas</button>    
+        <button id="calcButton" onclick="calcDist()">Calcular distribuição de bolsas</button>    
     </div>
     
     <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>        
@@ -212,6 +222,7 @@
                 alert('Atenção: o número de departamentos solicitantes de bolsas é maior que o número de bolsas disponíveis. Vide as regras para esse caso.')
             }
             else {
+                document.getElementById("calcButton").innerHTML = "Aguarde. Calculando...";
                 for (let dep in Deps) {
                     let min = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
                     if ((Deps[dep]['BSRi'] >= 1) && (min < 1)) Deps[dep]['min'] = 1;
@@ -256,7 +267,9 @@
                     for (let grant of minDepGrants) grantString += grant['grant'][i] + ' <br>';
                     document.getElementById('BDi_' + dep).innerHTML = grantString;
                     i++;
-                }                
+                }       
+                
+                document.getElementById("calcButton").innerHTML = "Calcular distribuição de bolsas";
             }
         }      
                 
