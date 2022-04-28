@@ -111,9 +111,12 @@
         
                             <li>A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática \(\sigma^2\) entre o número de bolsas disponibilizadas para o \(i\)-ésimo departamento e \(B_{G_i}\):
                                 \begin{equation}
-                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}
-                                \end{equation}                                    
-                            respeitada a condição de que \(B_{D_i}=B_{SR_i}\) caso: \(B_{SR_i} \leq B_{G_i}\).            
+                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\sigma_{i}^{2}}\text{ , em que } \sigma_{i}^{2}=
+                                    \begin{cases}
+                                        \left(B_{D_i} - B_{G_i}\right)^{2} & \text{se } B_{SR_i} > B_{G_i}\\
+                                        \infty & \text{se } B_{SR_i} \leq B_{G_i} \text{ e } B_{D_i} \neq B_{SR_i}
+                                    \end{cases}                                    
+                                \end{equation}                                                                
                             </li>
         
                             <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, deverão ser aplicados os critérios de desempate especificados no item <a href="#tiebreaker">Critérios de desempate</a>.</li>
