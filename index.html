@@ -83,7 +83,7 @@
                     
                     <li>Caso \(B_{SR} > B_{D}\) e \(N_{D_S} \leq B_{D}\) segue-se o processo a seguir:
                         <ol>
-                            <li>Calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico ao definido no documento <em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em> ou em documento mais atualizado. Aquele procedimento define que:
+                            <li>Calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico (substituindo-se os Centros pelos Departamentos) ao definido no documento <a href="https://drive.google.com/drive/folders/1KD-pdkrKwo-ZX3BRwBnqRgv7GwE4GL8G?usp=share_link"><em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em></a> ou em documento mais atualizado. Aquele procedimento define que:
                                 \begin{equation}
                                     P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T}
                                 \end{equation}
@@ -111,11 +111,7 @@
         
                             <li>A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática \(\sigma^2\) entre o número de bolsas disponibilizadas para o \(i\)-ésimo departamento e \(B_{G_i}\):
                                 \begin{equation}
-                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\sigma_{i}^{2}}\text{ , em que } \sigma_{i}^{2}=
-                                    \begin{cases}
-                                        \left(B_{D_i} - B_{G_i}\right)^{2} & \text{se } B_{SR_i} > B_{G_i}\\
-                                        \infty & \text{se } B_{SR_i} \leq B_{G_i} \text{ e } B_{D_i} \neq B_{SR_i}
-                                    \end{cases}                                    
+                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}           
                                 \end{equation}                                                                
                             </li>
         
@@ -141,14 +137,14 @@
         <ul id="instructions">
             <li>Informe o número de bolsas disponíveis \(B_D\) no campo de texto corresponde.</li>
 
-            <li>Informe o peso \(P_{i}\) de cada departamento nos campos correspondentes. Eles não necessitam estar normalizados, pois a simulação realiza a normalização.</li>
+            <li>Informe o peso \(P_{i}\) de cada departamento nos campos correspondentes. Eles não necessitam estar normalizados, pois a simulação realiza a normalização. <b>Atenção:</b> os valores de \(P_{i}\) automaticamente carregados na página são apenas um exemplo. Os valores corretos deverão ser levantados pelo CCA conforme explicado na Proposta de Regras.</li>
 
             <li>Informe o número \(B_{SR_i}\) de bolsas solicitadas por cada departamento nos campos correspondentes.</li>
 
-            <li>Clique no botão <b>Calcular distribuição de bolsas</b>. As bolsas a serem distribuídas serão informadas ao lado do rótulo \(B_{D_i}\). Caso haja mais que um conjunto \(B_{D_i}\) que resulte no mesmo \(\sigma^2\) mínimo, os conjuntos serão apresentados um abaixo do outro em ordem arbitrária.</li>
+            <li>Clique no botão <b>Calcular distribuição de bolsas</b>. As bolsas a serem distribuídas serão informadas ao lado do rótulo \(B_{D_i}\). Caso haja mais que um conjunto \(B_{D_i}\) que resulte no mesmo \(\sigma^2\) mínimo, os conjuntos serão apresentados um abaixo do outro em ordem arbitrária. Nesse caso deverão ser aplicados os <a href="#tiebreaker">Critérios de desempate</a>.</li>
         </ul>
         <div>
-            <p><label for="BD">Bolsas disponíveis (\(B_{D}\)): </label><input type="text" id="BD" value="5"></p>
+            <p><label for="BD">Bolsas disponíveis (\(B_{D}\)): </label><input type="text" id="BD" value="11"></p>
         </div>
         <div>
             <table>
@@ -162,19 +158,27 @@
                 </tr>
                 <tr>    
                     <th>\(P_i\)</th>
-                    <td><input type="text" id="Pi_DBPVA" name="Pi" value="1"></td>
-                    <td><input type="text" id="Pi_DCNME" name="Pi" value="1"></td>
-                    <td><input type="text" id="Pi_DDR" name="Pi" value="1"></td>
+                    <td><input type="text" id="Pi_DBPVA" name="Pi" value="3"></td>
+                    <td><input type="text" id="Pi_DCNME" name="Pi" value="4"></td>
+                    <td><input type="text" id="Pi_DDR" name="Pi" value="2"></td>
                     <td><input type="text" id="Pi_DRNPA" name="Pi" value="1"></td>
-                    <td><input type="text" id="Pi_DTAiSeR" name="Pi" value="1"></td>
+                    <td><input type="text" id="Pi_DTAiSeR" name="Pi" value="2"></td>
                 </tr>
                 <tr>    
                     <th>\(B_{SR_i}\)</th>
-                    <td><input type="text" id="BSRi_DBPVA" name="BSRi" value="2"></td>
-                    <td><input type="text" id="BSRi_DCNME" name="BSRi" value="2"></td>
-                    <td><input type="text" id="BSRi_DDR" name="BSRi" value="2"></td>
-                    <td><input type="text" id="BSRi_DRNPA" name="BSRi" value="2"></td>
-                    <td><input type="text" id="BSRi_DTAiSeR" name="BSRi" value="2"></td>
+                    <td><input type="text" id="BSRi_DBPVA" name="BSRi" value="6"></td>
+                    <td><input type="text" id="BSRi_DCNME" name="BSRi" value="1"></td>
+                    <td><input type="text" id="BSRi_DDR" name="BSRi" value="1"></td>
+                    <td><input type="text" id="BSRi_DRNPA" name="BSRi" value="1"></td>
+                    <td><input type="text" id="BSRi_DTAiSeR" name="BSRi" value="3"></td>
+                </tr>
+                <tr>    
+                    <th>\(B_{G_i}\)</th>
+                    <td><input type="text" id="BGi_DBPVA" name="BGi" value="" readonly="readonly"></td>
+                    <td><input type="text" id="BGi_DCNME" name="BGi" value="" readonly="readonly"></td>
+                    <td><input type="text" id="BGi_DDR" name="BGi" value="" readonly="readonly"></td>
+                    <td><input type="text" id="BGi_DRNPA" name="BGi" value="" readonly="readonly"></td>
+                    <td><input type="text" id="BGi_DTAiSeR" name="BGi" value="" readonly="readonly"></td>
                 </tr>
                 <tr>    
                     <th>\(B_{D_i}\)</th>
@@ -227,29 +231,32 @@
             else {
                 document.getElementById("calcButton").innerHTML = "Aguarde. Calculando...";
                 for (let dep in Deps) {
-                    let min = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
-                    if ((Deps[dep]['BSRi'] >= 1) && (min < 1)) Deps[dep]['min'] = 1;
-                    else Deps[dep]['min'] = min;
+                    let BGi = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
+                    if ((Deps[dep]['BSRi'] >= 1) && (BGi < 1)) Deps[dep]['BGi'] = 1;                    
+                    else Deps[dep]['BGi'] = BGi;
+                    document.getElementById('BGi_' + dep).value = Deps[dep]['BGi'].toFixed(3)
                 }
-                /*for (let dep in Deps) {
-                    let min = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
-                    if ((Deps[dep]['BSRi'] > 0) && (min < 1)) Deps[dep]['Pi'] = 1/tots['BDi'];
-                }
-                tots['Pi'] = 0;
-                for (let dep in Deps) tots['Pi'] += Deps[dep]['Pi'];
-                for (let dep in Deps) Deps[dep]['min'] = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];*/
-
 
                 if (tots['BDi'] >= tots['BSRi']) {
                     let grant = [];
                     for (let dep in Deps) grant.push(Number(document.getElementById('BSRi_' + dep).value));
                     depGrants.push({'dev': 0, 'grant': grant});
                 }
-                else genDepGrants([], 0, 0);            
-
-                /*for (let grant of depGrants) {
-                    for (let i = 0; i < grant['grant'].length; i++)
-                }*/
+                else genDepGrants([], 0, 0);
+                                
+                //Filter valid grant distributions:                
+                filteredGrants = []
+                for (let grant of depGrants) {
+                    let i = 0;
+                    let c = 1;
+                    for (let dep in Deps) {                        
+                        if (grant['grant'][i] > Deps[dep]['BSRi']) c *= 0;
+                        i++;                        
+                    }
+                    if (c == 1) filteredGrants.push(grant);
+                }
+                console.log(filteredGrants);
+                depGrants = filteredGrants;
 
                 let depGrantsSorted = depGrants.sort((a, b) => {
                     if (a['dev'] > b['dev']) return 1;
@@ -315,9 +322,8 @@
             let i = 0;
             let item;
             let penal = 1000;            
-            for (let dep in Deps) {
-                if ((Deps[dep]['BSRi'] <= Deps[dep]['min']) && (grant[i] != Deps[dep]['BSRi']) /*&& (tots['BDi'] >= tots['BSRi'])*/ /*&& (Deps[dep]['min'] >= 1)*/) return penal;
-                else dev += (grant[i] - Deps[dep]['min'])**2;                                
+            for (let dep in Deps) {                 
+                dev += (grant[i] - Deps[dep]['BGi'])**2;
                 i++;
             }
             return dev;
