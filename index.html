@@ -1,3 +1,8 @@
+<!--
+Copyright 2023 João Teles de Carvalho Neto
+MIT License.
+-->
+
 <html>
 
 <head>
@@ -197,22 +202,33 @@
 
     <script>
 
-        window.MathJax = {tex: {tags: 'ams'}};  //For latex equations automatic numbering
+        //Para numeração automática das equações em LaTeX:
+        window.MathJax = {tex: {tags: 'ams'}};
         
+        //Armazena o total dos pesos (Pi), bolsas solicitadas reduzidas (BSRi) e bolsas disponíveis (BDi):
         const tots = {'Pi': 0, 'BSRi': 0, 'BDi': 0};        
         
+        //Cria o dicionário de departamentos a partir dos elementos html que contenham "Pi" no atributo "name":
         const Deps = {};        
         for (let dep of document.getElementsByName('Pi')) Deps[dep.getAttribute('id').split('_')[1]] = {};
+        
+        //Contabiliza o número de departamentos:
         let totDeps = Object.keys(Deps).length;
-                
+
+        //Inicialização da lista de dicionários que armazenará as distribuições de bolsas juntamente com as respectivas variâncias:
         let depGrants = [];
 
+        //Função que implementa a distribuição de bolsas seguindo os critérios explicitados nas regras de monitoria contidos acima neste documento:
         function calcDist () {
 
+            //Inicialização da lista de bolsas e dos dicionários de totais:
             depGrants = [];
             tots['Pi'] = 0;
             tots['BSRi'] = 0;
             tots['BDi'] = Number(document.getElementById('BD').value);
+            
+            /*Procedimento que contabiliza o total de Pi e BSRi
+            e o número de departamentos que solicitou pelo menos uma bolsa (Dsolics):*/
             Dsolics = 0;                        
             for (let name of ['Pi', 'BSRi']) {
                 for (let x of document.getElementsByName(name)) {                    
@@ -223,28 +239,35 @@
                 }
             }    
 
+            //Caso em que o número de bolsas disponíveis é menor que o número de departamentos solicitantes:
             if (Dsolics > tots['BDi']) {
                 let i = 0;
                 for (let dep in Deps) document.getElementById('BDi_' + dep).innerHTML = '';
                 alert('Atenção: o número de departamentos solicitantes de bolsas é maior que o número de bolsas disponíveis. Vide as regras para esse caso.')
             }
+            //Caso em que o número de bolsas disponíveis é maior ou igual que o número de departamentos solicitantes:
             else {
                 document.getElementById("calcButton").innerHTML = "Aguarde. Calculando...";
+
+                //Calcula as bolsas garantidas (BGi):
                 for (let dep in Deps) {
                     let BGi = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
+                    //Atribui BGi = 1 para o departamento que obteve BGi < 1 e solicitou bolsa:
                     if ((Deps[dep]['BSRi'] >= 1) && (BGi < 1)) Deps[dep]['BGi'] = 1;                    
                     else Deps[dep]['BGi'] = BGi;
                     document.getElementById('BGi_' + dep).value = Deps[dep]['BGi'].toFixed(3)
                 }
 
+                //Se as bolsas disponíveis forem maiores ou iguais às solicitadas, acata a todas as solicitações:
                 if (tots['BDi'] >= tots['BSRi']) {
                     let grant = [];
                     for (let dep in Deps) grant.push(Number(document.getElementById('BSRi_' + dep).value));
                     depGrants.push({'dev': 0, 'grant': grant});
                 }
+                //Caso contrário, aplica o procedimento de minimização da variância conforme equação (3) deste documento:
                 else genDepGrants([], 0, 0);
                                 
-                //Filter valid grant distributions:                
+                //Descarta a distribuição de bolsas em que algum departamento receba mais bolsas que o solicitado:                
                 filteredGrants = []
                 for (let grant of depGrants) {
                     let i = 0;
@@ -258,12 +281,14 @@
                 console.log(filteredGrants);
                 depGrants = filteredGrants;
 
+                //Ordena a lista de distribuição de bolsas em ordem crescente de variância:
                 let depGrantsSorted = depGrants.sort((a, b) => {
                     if (a['dev'] > b['dev']) return 1;
                     else if (a['dev'] < b['dev']) return -1;
                     else return 0;
                 });
-                            
+                
+                //Seleciona somente as menores distribuições dentro de uma tolerância epsilon:
                 let minDepGrants = [];
                 const epsilon = 1e-6;
                 for (let grant of depGrantsSorted) {
@@ -271,6 +296,7 @@
                     else break;
                 }
                 
+                //Coloca o resultado na saída html para visualização dos usuários:
                 let i = 0;
                 for (let dep in Deps) { 
                     let grantString = '';                
@@ -283,26 +309,57 @@
             }
         }      
                 
+        /*
+        Esta função gera todas as permutações possíveis de distribuição de bolsas disponíveis entre os departamentos.
+        Para cada distribuição, calcula a variância da distribuição seguindo a equação (3) deste documento.
+        Esses resultados são armazenados na variável depGrants.
+
+        Explicação:
+        perm armazena uma lista com caracteres 'a' e 'b'. O número de caracteres 'a' representa
+        a quantidade de bolsas de um departamento. O caractere 'b' representa o separador entre os departamentos.
+        Por exemplo: perm=[a,b,a,a,b,a,a,a,b,a,b,a,a,a] indica que o 1°, 2°, 3°, 4° e 5° departamentos receberam,
+        respectivamente, 1, 2, 3, 1 e 3 bolsas.
+        Outro exemplo: perm=[b,b,a,a,b,a,a,a,a,b,a] indica que o 1°, 2°, 3°, 4° e 5° departamentos receberam,
+        respectivamente, 0, 0, 2, 4 e 1 bolsas.
+        sa e sb armazenam o total de caracteres 'a' e 'b', respectivamente, na lista perm.
+        A função deve ser chamada com a lista vazia e os totais nulos, ou seja, perm=[] e sa=sb=0.
+        A função é recorrente e abre dois ramos em paralelo a cada recorrência: um que adiciona o caractere 'a'
+        e outro que adiciona o caractere 'b' a lista perm, atualizando os respectivos sa e sb.
+        Quando um dos ramos resulta em sa igual ao total de bolsas disponíveis ou sb igual ao número de separadores
+        de departamentos (n° de departamentos - 1), esse ramo é encerrado e correspondente distribuição é adcionada
+        à variável depGrants.
+        */
         function genDepGrants (perm, sa, sb) {
+            //Só entra na recorrência se os separadores de departamento e as bolsas disponíveis ainda forem inferiores aos totais:
             if ((sa + sb) < (tots['BDi'] + totDeps - 1)) {                
+                //Ramo da recorrência em que o número de bolsas ainda é menor que o disponível:
                 if (sa < tots['BDi']) {                   
                     let permN = perm.slice(0, perm.length); //just a perm copy 
                     permN.push('a');
                     genDepGrants(permN, sa + 1, sb);
                 }
+                //Ramo da recorrência em que o número de separadores dos departamentos ainda é menor que o existente:
                 if (sb < totDeps - 1) {                    
                     let permN = perm.slice(0, perm.length); //just a perm copy
                     permN.push('b');                
                     genDepGrants(permN, sa, sb + 1);
                 }
             }
+            //Termina a recorrência e adiciona o resultado à lista depGrants:
             else {
+                //Traduz a lista perm, para uma lista simples de número de bolsas por departamento:
                 let grant = permsToGrants(perm);
+                //Calcula a variância da lista grant:
                 let dev = stdDev(grant);
+                //Atualiza depGrants com esta permutação:
                 depGrants.push({'dev': dev, 'grant': grant});
             }
         }            
         
+        /* Função que transforma uma lista perm usada pela função genDepGrants em uma lista numérica simples.
+           Por exemplo, se perm = [a,b,a,a,b,a,a,a,b,a,b,a,a,a] a função retorna [1,2,3,1,3].
+           Outro exemplo, se perm = [b,b,a,a,b,a,a,a,a,b,a] a função retorna [0,0,2,4,1].
+        */
         function permsToGrants (perm) {
             let grant = [];
             let s = 0;
@@ -317,6 +374,7 @@
             return(grant);
         }
 
+        //Função que retorna a variância de uma distribuição de bolsas de acordo com a equação (3) deste documento.
         function stdDev (grant) {            
             let dev = 0
             let i = 0;
