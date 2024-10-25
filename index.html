@@ -1,394 +1,116 @@
 <!--
-Copyright 2023 João Teles de Carvalho Neto
+Copyright 2024 João Teles de Carvalho Neto
 MIT License.
 -->
 
-<html>
-
+<!DOCTYPE html>
+<html lang="pt">
 <head>
-    <title>Proposta de Regras para Bolsas de Monitoria do CCA/UFSCar</title>
-    <style>
-        .framed {
-            background-color: rgb(220, 220, 220);
-            border-style: groove;
-            padding: 7px;
-            margin: 10px 5px;
-        }
-        .simulations {
-            background-color: rgb(220, 220, 220);
-            border-style: groove;
-            padding: 7px;
-            margin: 10px 5px;
-        }
-        #textRules {
-            border-style: groove;
-            padding: 7px;
-            margin: 10px 5px;
-        }
-        #simulations {
-            border-style: groove;
-            padding: 20px;
-            margin: 10px 5px;
-            text-align: center;
-        }
-        #instructions {
-            text-align: left;
-        }
-        button {
-            background-color: khaki;
-            padding: 10px;
-            margin: 10px 5px;
-            border-width: 2px;
-            border-radius: 7px;            
-            font-weight: bold;
-        }
-        li {
-            padding-bottom: 5px;
-            padding-top: 5px;
-        }
-        input {
-            width: 70px;
-            text-align: center;
-        }
-        h3 {
-            text-align: center;
-        }        
-        table {
-            text-align: center;
-            margin: auto;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Distribuição de Bolsas</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 </head>
-
-<body id="body">
-    <div id="textRules">
-        <h3>Proposta de Regras para Bolsas de Monitoria do CCA/UFSCar</h3>
-        <p><b>Atenção: </b> este conjunto de regras é uma proposta que encontra-se em análise e, portanto, não possui ainda qualquer valor legal.</p>
-        <ol>            
-            <li>A Comissão de Bolsas de Monitoria do CCA/UFSCar (CBM-CCA) deverá definir a distribuição de bolsas de monitoria entre os departamentos do CCA/UFSCar respeitando os critérios estebelecidos neste documento.</li>
-            <li>O prazo máximo para a definição da distribuição de bolsas pela CBM-CCA será de 10 dias após a disponibilização de vagas pela ProGrad/UFSCar.
-            <li>Não há limite de vagas não remuneradas para bolsistas voluntários, sendo os critérios e limites dessa modalidade de vaga definidos por cada departamento. Portanto, este conjunto de regras aplica-se somente às vagas remuneradas.
-            <li>Não há limitação de solicitações de bolsas por docente ou por turma.</li>
-            <li>
-                A distribuição das bolsas por departamento seguirá o processo na ordem a seguir:
-                <ol>
-                    <li>Chamaremos de \(B_S\) o número total de bolsas solicitadas e de \(B_D\) o número total de bolsas disponíveis para o CCA.</li>
-                    
-                    <li>Caso \(B_{S} \leq B_{D}\), todas as solicitações serão atendidas e encerra-se o processo.</li>
-                    
-                    <li>Caso \(B_{S} > B_{D}\), verifica-se qual é o número \(N_{S_{max}}\) que corresponde ao maior número de bolsas solicitadas para uma mesma turma.</li>
-                    
-                    <li>Caso \(N_{S_{max}} > 1\), cada turma que contenha a solicitação de \(N_{S_{max}}\) terá a sua solicitação reduzida em 1 (uma) bolsa. Essas reduções produzirão um número total de bolsas solicitadas reduzidas, que chamaremos de \(B_{SR}\). Caso \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo. Caso contrário, verifica-se qual é o \(N_{SR_{max}}\) das solicitações reduzidas e aplica-se o procedimento do início deste item. Esse procedimento é repetido até que \(B_{SR} \leq B_{D}\).</li>
-                    
-                    <li>Caso todas as solicitações reduzidas contemplem pelo menos uma bolsa por turma e \(B_{SR} \leq B_{D}\), as solicitações reduzidas serão atendidas e encerra-se o processo.</li>            
-
-                    <li>Chamaremos de \(N_{D_S}\) o número de departamentos que estejam solicitando 1 (uma) ou mais bolsas.</li>
-                    
-                    <li>Caso \(B_{SR} > B_{D}\) e \(N_{D_S} > B_{D}\), então as bolsas serão distribuídas seguindo os critérios de desempate especificados no item <a href="#tiebreaker">Critérios de desempate</a>.</li>                    
-                    
-                    <li>Caso \(B_{SR} > B_{D}\) e \(N_{D_S} \leq B_{D}\) segue-se o processo a seguir:
-                        <ol>
-                            <li>Calcula-se o peso do \(i\)-ésimo departamento (\(P_i\)) utilizando procedimento idêntico (substituindo-se os Centros pelos Departamentos) ao definido no documento <a href="https://drive.google.com/drive/folders/1KD-pdkrKwo-ZX3BRwBnqRgv7GwE4GL8G?usp=share_link"><em>Relatório da Comissão do Programa de Monitoria da UFSCar</em> utilizado pela <em>Resolução COG No 316, de 10 de fevereiro de 2020</em></a> ou em documento mais atualizado. Aquele procedimento define que:
-                                \begin{equation}
-                                    P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T}
-                                \end{equation}
-                            em que:
-                            <ul>
-                                <li>\(P_{T} = \sum_{i}(Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i})\) é o fator de normalização.</li>
-                                <li>\(Q_{I_i}\) é a quantidade de inscrições em atividades no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                                <li>\(Q_{R_i}\) é a quantidade de reprovações no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                                <li>\(Q_{T_i}\) é a quantidade de créditos teóricos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                                <li>\(Q_{P_i}\) é a quantidade de créditos práticos no \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                                <li>\(N_{T_i}\) é a quantidade de turmas ofertadas pelo \(i\)-ésimo departamento nos últimos 5 anos.</li>
-                            </ul>
-                            No caso da resolução COG 316-10/02/20, como últimos 5 anos foram considerados os anos de 2014 a 2018. Além disso, naquela resolução, acordou-se que "para avaliar os números acima, não seriam consideradas as ACIEPEs, atividades de estágio, projeto e monografia, atividades na modalidade EAD e atividades normalmente contempladas pelo Programa de Tutoria". Todas essas decisões também serão adotadas para o cálculo de cada \(P_{i}\) do CCA.
-                            </li>
-        
-                            <li>Define-se \(B_{G_i}\) como sendo a quantidade mínima de bolsas garantidas para o \(i\)-ésimo departamento, calculado por:
-                                \begin{equation}
-                                    B_{G_i} = P_{i}B_{D}
-                                \end{equation}
-                            </li>
-        
-                            <li>O \(i\)-ésimo departamento que apresentar, simultaneamente, \(B_{G_i} < 1\) e \(B_{SR_i} \geq 1\) terá a sua quantidade mínima de bolsas garantidas corrigida para \(B_{G_i} = 1\).</li>
-        
-                            <li>Define-se \(B_{D_i}\) como sendo a quantidade de bolsas disponibilizadas ao \(i\)-ésimo departamento, em que, consequentemente \(B_{D}=\sum_{i}B_{D_i}\).</li>
-        
-                            <li>A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática \(\sigma^2\) entre o número de bolsas disponibilizadas para o \(i\)-ésimo departamento e \(B_{G_i}\):
-                                \begin{equation}
-                                    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}           
-                                \end{equation}                                                                
-                            </li>
-        
-                            <li>Caso haja mais que um conjunto \(B_{D_i}\) com mesmo valor de \(\sigma^2\) mínimo, deverão ser aplicados os critérios de desempate especificados no item <a href="#tiebreaker">Critérios de desempate</a>.</li>
-                        </ol>
-                    </li>                       
-                    
-                    <li><b id="tiebreaker">Critérios de desempate</b>: privilegiar-se-á a distribuição de bolsas que favoreça o departamento com maior valor de \(Q_{I_i}\), seguido do maior \(Q_{R_i}\), maior \(Q_{P_i}\), maior \(Q_{T_i}\) e maior \(N_{T_i}\), nessa ordem, até que sobre uma única distribuição de bolsas. Essa ordem somente deverá ser quebrada se for para satisfazer a condição de que todo departamento tenha pelo menos a solicitação de 1 (uma) bolsa atendida a cada 2 (dois) semestres, conforme o disposto na resolução COG 316-10/02/20.</li>
-
-                    <li>Casos omissos serão deliberados pela CBM-CCA.</li>
-                    
-                    </ul>                
-                </ol>
-            </li>
-
-            <li>A distribuição das bolsas \(B_{D_i}\) entre as solicitações do \(i\)-ésimo departamento deverão ser feitas a cargo do representante da CBM-CCA do correspondente departamento utilizando critérios que satisfaçam o atendimento às disciplinas represadas e as que tenham pré-requisitos que foram ministrados durante os ENPEs, sendo esses critérios aprovados no respectivo departamento.</li>
-
-        </ol>	  	
-    </div>
-
-    <div id="simulations">
-        <h3>Simulação da distribuição de bolsas</h2>
-        <ul id="instructions">
-            <li>Informe o número de bolsas disponíveis \(B_D\) no campo de texto corresponde.</li>
-
-            <li>Informe o peso \(P_{i}\) de cada departamento nos campos correspondentes. Eles não necessitam estar normalizados, pois a simulação realiza a normalização. <b>Atenção:</b> os valores de \(P_{i}\) automaticamente carregados na página são apenas um exemplo. Os valores corretos deverão ser levantados pelo CCA conforme explicado na Proposta de Regras.</li>
-
-            <li>Informe o número \(B_{SR_i}\) de bolsas solicitadas por cada departamento nos campos correspondentes.</li>
-
-            <li>Clique no botão <b>Calcular distribuição de bolsas</b>. As bolsas a serem distribuídas serão informadas ao lado do rótulo \(B_{D_i}\). Caso haja mais que um conjunto \(B_{D_i}\) que resulte no mesmo \(\sigma^2\) mínimo, os conjuntos serão apresentados um abaixo do outro em ordem arbitrária. Nesse caso deverão ser aplicados os <a href="#tiebreaker">Critérios de desempate</a>.</li>
-        </ul>
-        <div>
-            <p><label for="BD">Bolsas disponíveis (\(B_{D}\)): </label><input type="text" id="BD" value="11"></p>
-        </div>
-        <div>
-            <table>
-                <tr>
-                    <th></th>
-                    <td>DBPVA</td>
-                    <td>DCNME</td>
-                    <td>DDR</td>
-                    <td>DRNPA</td>
-                    <td>DTAiSeR</td>
-                </tr>
-                <tr>    
-                    <th>\(P_i\)</th>
-                    <td><input type="text" id="Pi_DBPVA" name="Pi" value="3"></td>
-                    <td><input type="text" id="Pi_DCNME" name="Pi" value="4"></td>
-                    <td><input type="text" id="Pi_DDR" name="Pi" value="2"></td>
-                    <td><input type="text" id="Pi_DRNPA" name="Pi" value="1"></td>
-                    <td><input type="text" id="Pi_DTAiSeR" name="Pi" value="2"></td>
-                </tr>
-                <tr>    
-                    <th>\(B_{SR_i}\)</th>
-                    <td><input type="text" id="BSRi_DBPVA" name="BSRi" value="6"></td>
-                    <td><input type="text" id="BSRi_DCNME" name="BSRi" value="1"></td>
-                    <td><input type="text" id="BSRi_DDR" name="BSRi" value="1"></td>
-                    <td><input type="text" id="BSRi_DRNPA" name="BSRi" value="1"></td>
-                    <td><input type="text" id="BSRi_DTAiSeR" name="BSRi" value="3"></td>
-                </tr>
-                <tr>    
-                    <th>\(B_{G_i}\)</th>
-                    <td><input type="text" id="BGi_DBPVA" name="BGi" value="" readonly="readonly"></td>
-                    <td><input type="text" id="BGi_DCNME" name="BGi" value="" readonly="readonly"></td>
-                    <td><input type="text" id="BGi_DDR" name="BGi" value="" readonly="readonly"></td>
-                    <td><input type="text" id="BGi_DRNPA" name="BGi" value="" readonly="readonly"></td>
-                    <td><input type="text" id="BGi_DTAiSeR" name="BGi" value="" readonly="readonly"></td>
-                </tr>
-                <tr>    
-                    <th>\(B_{D_i}\)</th>
-                    <td><p id="BDi_DBPVA" name="BDi"></p></td>
-                    <td><p id="BDi_DCNME" name="BDi"></p></td>
-                    <td><p id="BDi_DDR" name="BDi"></p></td>
-                    <td><p id="BDi_DRNPA" name="BDi"></p></td>
-                    <td><p id="BDi_DTAiSeR" name="BDi"></p></td>
-                </tr>
-                </table>
-        </div>    
-        <button id="calcButton" onclick="calcDist()">Calcular distribuição de bolsas</button>    
-    </div>
+<body>
+    <h1>Distribuição de Bolsas</h1>
     
-    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>        
+    <!-- Inputs para o usuário -->
+    <p>
+        <label for="solicitacoes">Solicitações dos Departamentos:</label>
+        <input type="text" id="solicitacoes" size="43" value="DBPVA:4, DCNME:10, DDR: 3, DTAiSeR: 2, DRNPA: 2" />
+    </p>
+    
+    <p>
+        <label for="bolsas">Bolsas Disponíveis:</label>
+        <input type="number" id="bolsas" min="1" max="39" value="12" />
+    </p>
+    
+    <p>
+        <label for="melhores">Número de Melhores Distribuições:</label>
+        <input type="number" id="melhores" min="1" max="99" value="10" />
+    </p>
+
+    <button onclick="runPythonCode()">Executar Distribuição</button>
+    
+    <pre id="output"></pre>
 
     <script>
-
-        //Para numeração automática das equações em LaTeX:
-        window.MathJax = {tex: {tags: 'ams'}};
-        
-        //Armazena o total dos pesos (Pi), bolsas solicitadas reduzidas (BSRi) e bolsas disponíveis (BDi):
-        const tots = {'Pi': 0, 'BSRi': 0, 'BDi': 0};        
-        
-        //Cria o dicionário de departamentos a partir dos elementos html que contenham "Pi" no atributo "name":
-        const Deps = {};        
-        for (let dep of document.getElementsByName('Pi')) Deps[dep.getAttribute('id').split('_')[1]] = {};
-        
-        //Contabiliza o número de departamentos:
-        let totDeps = Object.keys(Deps).length;
-
-        //Inicialização da lista de dicionários que armazenará as distribuições de bolsas juntamente com as respectivas variâncias:
-        let depGrants = [];
-
-        //Função que implementa a distribuição de bolsas seguindo os critérios explicitados nas regras de monitoria contidos acima neste documento:
-        function calcDist () {
-
-            //Inicialização da lista de bolsas e dos dicionários de totais:
-            depGrants = [];
-            tots['Pi'] = 0;
-            tots['BSRi'] = 0;
-            tots['BDi'] = Number(document.getElementById('BD').value);
-            
-            /*Procedimento que contabiliza o total de Pi e BSRi
-            e o número de departamentos que solicitou pelo menos uma bolsa (Dsolics):*/
-            Dsolics = 0;                        
-            for (let name of ['Pi', 'BSRi']) {
-                for (let x of document.getElementsByName(name)) {                    
-                    let v = Number(x.value.replace(',', '.'));
-                    Deps[x.getAttribute('id').split('_')[1]][name] = v;
-                    tots[name] += v;            
-                    if (name == 'BSRi' && v > 0) Dsolics++;
-                }
-            }    
-
-            //Caso em que o número de bolsas disponíveis é menor que o número de departamentos solicitantes:
-            if (Dsolics > tots['BDi']) {
-                let i = 0;
-                for (let dep in Deps) document.getElementById('BDi_' + dep).innerHTML = '';
-                alert('Atenção: o número de departamentos solicitantes de bolsas é maior que o número de bolsas disponíveis. Vide as regras para esse caso.')
-            }
-            //Caso em que o número de bolsas disponíveis é maior ou igual que o número de departamentos solicitantes:
-            else {
-                document.getElementById("calcButton").innerHTML = "Aguarde. Calculando...";
-
-                //Calcula as bolsas garantidas (BGi):
-                for (let dep in Deps) {
-                    let BGi = tots['BDi']*Deps[dep]['Pi']/tots['Pi'];
-                    //Atribui BGi = 1 para o departamento que obteve BGi < 1 e solicitou bolsa:
-                    if ((Deps[dep]['BSRi'] >= 1) && (BGi < 1)) Deps[dep]['BGi'] = 1;                    
-                    else Deps[dep]['BGi'] = BGi;
-                    document.getElementById('BGi_' + dep).value = Deps[dep]['BGi'].toFixed(3)
-                }
-
-                //Se as bolsas disponíveis forem maiores ou iguais às solicitadas, acata a todas as solicitações:
-                if (tots['BDi'] >= tots['BSRi']) {
-                    let grant = [];
-                    for (let dep in Deps) grant.push(Number(document.getElementById('BSRi_' + dep).value));
-                    depGrants.push({'dev': 0, 'grant': grant});
-                }
-                //Caso contrário, aplica o procedimento de minimização da variância conforme equação (3) deste documento:
-                else genDepGrants([], 0, 0);
-                                
-                //Descarta a distribuição de bolsas em que algum departamento receba mais bolsas que o solicitado:                
-                filteredGrants = []
-                for (let grant of depGrants) {
-                    let i = 0;
-                    let c = 1;
-                    for (let dep in Deps) {                        
-                        if (grant['grant'][i] > Deps[dep]['BSRi']) c *= 0;
-                        i++;                        
-                    }
-                    if (c == 1) filteredGrants.push(grant);
-                }
-                console.log(filteredGrants);
-                depGrants = filteredGrants;
-
-                //Ordena a lista de distribuição de bolsas em ordem crescente de variância:
-                let depGrantsSorted = depGrants.sort((a, b) => {
-                    if (a['dev'] > b['dev']) return 1;
-                    else if (a['dev'] < b['dev']) return -1;
-                    else return 0;
-                });
-                
-                //Seleciona somente as menores distribuições dentro de uma tolerância epsilon:
-                let minDepGrants = [];
-                const epsilon = 1e-6;
-                for (let grant of depGrantsSorted) {
-                    if (Math.abs(grant['dev'] - depGrantsSorted[0]['dev']) < epsilon) minDepGrants.push(grant);
-                    else break;
-                }
-                
-                //Coloca o resultado na saída html para visualização dos usuários:
-                let i = 0;
-                for (let dep in Deps) { 
-                    let grantString = '';                
-                    for (let grant of minDepGrants) grantString += grant['grant'][i] + ' <br>';
-                    document.getElementById('BDi_' + dep).innerHTML = grantString;
-                    i++;
-                }       
-                
-                document.getElementById("calcButton").innerHTML = "Calcular distribuição de bolsas";
-            }
-        }      
-                
-        /*
-        Esta função gera todas as permutações possíveis de distribuição de bolsas disponíveis entre os departamentos.
-        Para cada distribuição, calcula a variância da distribuição seguindo a equação (3) deste documento.
-        Esses resultados são armazenados na variável depGrants.
-
-        Explicação:
-        perm armazena uma lista com caracteres 'a' e 'b'. O número de caracteres 'a' representa
-        a quantidade de bolsas de um departamento. O caractere 'b' representa o separador entre os departamentos.
-        Por exemplo: perm=[a,b,a,a,b,a,a,a,b,a,b,a,a,a] indica que o 1°, 2°, 3°, 4° e 5° departamentos receberam,
-        respectivamente, 1, 2, 3, 1 e 3 bolsas.
-        Outro exemplo: perm=[b,b,a,a,b,a,a,a,a,b,a] indica que o 1°, 2°, 3°, 4° e 5° departamentos receberam,
-        respectivamente, 0, 0, 2, 4 e 1 bolsas.
-        sa e sb armazenam o total de caracteres 'a' e 'b', respectivamente, na lista perm.
-        A função deve ser chamada com a lista vazia e os totais nulos, ou seja, perm=[] e sa=sb=0.
-        A função é recorrente e abre dois ramos em paralelo a cada recorrência: um que adiciona o caractere 'a'
-        e outro que adiciona o caractere 'b' a lista perm, atualizando os respectivos sa e sb.
-        Quando um dos ramos resulta em sa igual ao total de bolsas disponíveis ou sb igual ao número de separadores
-        de departamentos (n° de departamentos - 1), esse ramo é encerrado e correspondente distribuição é adcionada
-        à variável depGrants.
-        */
-        function genDepGrants (perm, sa, sb) {
-            //Só entra na recorrência se os separadores de departamento e as bolsas disponíveis ainda forem inferiores aos totais:
-            if ((sa + sb) < (tots['BDi'] + totDeps - 1)) {                
-                //Ramo da recorrência em que o número de bolsas ainda é menor que o disponível:
-                if (sa < tots['BDi']) {                   
-                    let permN = perm.slice(0, perm.length); //just a perm copy 
-                    permN.push('a');
-                    genDepGrants(permN, sa + 1, sb);
-                }
-                //Ramo da recorrência em que o número de separadores dos departamentos ainda é menor que o existente:
-                if (sb < totDeps - 1) {                    
-                    let permN = perm.slice(0, perm.length); //just a perm copy
-                    permN.push('b');                
-                    genDepGrants(permN, sa, sb + 1);
-                }
-            }
-            //Termina a recorrência e adiciona o resultado à lista depGrants:
-            else {
-                //Traduz a lista perm, para uma lista simples de número de bolsas por departamento:
-                let grant = permsToGrants(perm);
-                //Calcula a variância da lista grant:
-                let dev = stdDev(grant);
-                //Atualiza depGrants com esta permutação:
-                depGrants.push({'dev': dev, 'grant': grant});
-            }
-        }            
-        
-        /* Função que transforma uma lista perm usada pela função genDepGrants em uma lista numérica simples.
-           Por exemplo, se perm = [a,b,a,a,b,a,a,a,b,a,b,a,a,a] a função retorna [1,2,3,1,3].
-           Outro exemplo, se perm = [b,b,a,a,b,a,a,a,a,b,a] a função retorna [0,0,2,4,1].
-        */
-        function permsToGrants (perm) {
-            let grant = [];
-            let s = 0;
-            for (let i = 0; i < perm.length; i++) {                
-                if (perm[i] == 'a') s += 1;
-                else {
-                    grant.push(s);
-                    s = 0;                    
-                }                
-            }
-            grant.push(s);
-            return(grant);
+        async function loadPyodideAndPackages() {
+            // Carregar o Pyodide
+            let pyodide = await loadPyodide();
+            return pyodide;
         }
 
-        //Função que retorna a variância de uma distribuição de bolsas de acordo com a equação (3) deste documento.
-        function stdDev (grant) {            
-            let dev = 0
-            let i = 0;
-            let item;
-            let penal = 1000;            
-            for (let dep in Deps) {                 
-                dev += (grant[i] - Deps[dep]['BGi'])**2;
-                i++;
+        async function runPythonCode() {
+            // Carregar Pyodide se ainda não carregado
+            if (!window.pyodide) {
+                window.pyodide = await loadPyodideAndPackages();
             }
-            return dev;
-        }        
-                
+
+            // Obter os valores dos inputs do usuário
+            const solicitacoesInput = document.getElementById("solicitacoes").value;
+            const bolsasDisponiveis = document.getElementById("bolsas").value;
+            const NmelhoresDistribuicoes = document.getElementById("melhores").value;
+
+            // Converter as solicitações em uma lista de listas em Python
+            const solicitacoesDepartamentos = solicitacoesInput.split(',').map(item => {
+                const [nome, qtd] = item.split(':');
+                return [nome.trim(), parseInt(qtd.trim())];
+            });
+
+            // Criar uma string com o código Python e passar os valores do usuário
+            let pythonCode = `
+from statistics import stdev
+
+solicitacoesDepartamentos = ${JSON.stringify(solicitacoesDepartamentos)}
+bolsasDisponiveis = int(${bolsasDisponiveis})
+NmelhoresDistribuicoes = int(${NmelhoresDistribuicoes})
+
+bolsasSolicitadas = [b[1] for b in solicitacoesDepartamentos]
+Ndepts = len(solicitacoesDepartamentos)
+bolsasAtribuidas = [0]*Ndepts
+bolsasTodasCombinacoes = []
+
+def updateBolsasTodasCombinacoes(bolsas):
+    bsR = [bolsa/solicitada for bolsa, solicitada in zip(bolsas, bolsasSolicitadas)]                        
+    bolsas.append(stdev(bsR))
+    bolsasTodasCombinacoes.append(bolsas)
+
+for i in range(bolsasDisponiveis + 1):
+    if Ndepts == 2:
+        updateBolsasTodasCombinacoes([i, bolsasDisponiveis - i])
+    else:
+        for j in range(bolsasDisponiveis - i + 1):
+            if Ndepts == 3:
+                updateBolsasTodasCombinacoes([i, j, bolsasDisponiveis - i - j])
+            else:
+                for k in range(bolsasDisponiveis - i - j + 1):
+                    if Ndepts == 4:
+                        updateBolsasTodasCombinacoes([i, j, k, bolsasDisponiveis - i - j - k])
+                    else:
+                        for l in range(bolsasDisponiveis - i - j - k + 1):                            
+                            updateBolsasTodasCombinacoes([i, j, k, l, bolsasDisponiveis - i - j - k - l])
+
+bolsasTodasCombinacoes.sort(key=lambda bolsas: bolsas[-1])
+
+header = [dep[0] for dep in solicitacoesDepartamentos]
+output = '\\t\\t'.join(header) + '\\t\\tStd Dev\\n'
+for i in range(NmelhoresDistribuicoes):    
+    fracs = [f"({bolsa}/{solicitada}){(bolsa/solicitada):.3f}" for bolsa, solicitada in zip(bolsasTodasCombinacoes[i][:-1], bolsasSolicitadas)]    
+    output += '\\t'.join(fracs) + f'\\t{bolsasTodasCombinacoes[i][-1]:.3f}\\n'
+
+output
+            `;
+
+            try {
+                // Executar o código Python
+                let result = await window.pyodide.runPythonAsync(pythonCode);
+                // Mostrar o resultado na página HTML
+                document.getElementById("output").textContent = result;
+            } catch (error) {
+                console.error(error);
+                document.getElementById("output").textContent = error;
+            }
+        }
     </script>
-
 </body>
-
 </html>
