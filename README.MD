@@ -38,9 +38,7 @@ Para acessar a página da proposta [clique aqui](https://jocoteles.github.io/Bol
 
    **Item 5.8.1:** Calcula-se o peso do $i$-ésimo departamento ($P_i$) utilizando procedimento idêntico (substituindo-se os Centros pelos Departamentos) ao definido no documento [Relatório da Comissão do Programa de Monitoria da UFSCar](https://drive.google.com/drive/folders/1KD-pdkrKwo-ZX3BRwBnqRgv7GwE4GL8G?usp=share_link) utilizado pela Resolução COG No 316, de 10 de fevereiro de 2020 ou em documento mais atualizado. Aquele procedimento define que:
 
-   ```math
    $$P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T}$$
-   ```
 
    Em que: $P_{T} = \sum_{i}(Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i})$ é o fator de normalização; $Q_{I_i}$ é a quantidade de inscrições em atividades no $i$-ésimo departamento nos últimos 5 anos; $Q_{R_i}$ é a quantidade de reprovações no $i$-ésimo departamento nos últimos 5 anos; $Q_{T_i}$ é a quantidade de créditos teóricos no $i$-ésimo departamento nos últimos 5 anos; $Q_{P_i}$ é a quantidade de créditos práticos no $i$-ésimo departamento nos últimos 5 anos; $N_{T_i}$ é a quantidade de turmas ofertadas pelo $i$-ésimo departamento nos últimos 5 anos.
 
