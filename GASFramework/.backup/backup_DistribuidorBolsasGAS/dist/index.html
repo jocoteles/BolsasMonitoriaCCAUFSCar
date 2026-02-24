@@ -515,6 +515,9 @@
       function validateDepartment(list) {
         for (let i = 0; i < list.length; i++) {
           const d = list[i];
+          if (isEmptyDiscipline(d)) {
+            continue;
+          }
           if (!/^\d{6}$/.test(String(d.codigo || ''))) {
             return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
           }
@@ -530,10 +533,21 @@
         return { ok: true };
       }
 
+      function isEmptyDiscipline(d) {
+        const code = String(d.codigo || '').trim();
+        const name = String(d.disciplina || '').trim();
+        const prof = String(d.professor || '').trim();
+        const ct = Number(d.ct || 0);
+        const cp = Number(d.cp || 0);
+        return !code && !name && !prof && ct === 0 && cp === 0;
+      }
+
       function collectPayload() {
         return {
           settings: state.settings,
-          disciplines: state.userDept ? (state.disciplinesByDept[state.userDept] || []) : []
+          disciplines: state.userDept
+            ? (state.disciplinesByDept[state.userDept] || []).filter(d => !isEmptyDiscipline(d))
+            : []
         };
       }
 
