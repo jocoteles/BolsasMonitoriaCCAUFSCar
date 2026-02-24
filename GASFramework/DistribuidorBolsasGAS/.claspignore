@@ -1,0 +1,6 @@
+# Ignorar arquivos locais que não devem ir para o Apps Script
+.env
+placeholders.json
+syncgas.sh
+README.md
+dist/
