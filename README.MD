@@ -8,7 +8,10 @@ Para acessar a página da proposta [clique aqui](https://jocoteles.github.io/Bol
 - Assista ao [vídeo explicativo](https://youtu.be/46nYxaz4Ijk) sobre as regras.
 - Caso tenha interesse na explicação do código que implementa as regras, assista [este vídeo](https://youtu.be/04L09SIT9yA).
 
+---
+
 **Regras Completas**
+
 **Atenção:** este conjunto de regras é uma proposta que encontra-se em análise e, portanto, não possui ainda qualquer valor legal.
 
 1. A Comissão de Bolsas de Monitoria do CCA/UFSCar (CBM-CCA) deverá definir a distribuição de bolsas de monitoria entre os departamentos do CCA/UFSCar respeitando os critérios estebelecidos neste documento.
@@ -35,9 +38,9 @@ Para acessar a página da proposta [clique aqui](https://jocoteles.github.io/Bol
 
    **Item 5.8.1:** Calcula-se o peso do $i$-ésimo departamento ($P_i$) utilizando procedimento idêntico (substituindo-se os Centros pelos Departamentos) ao definido no documento [Relatório da Comissão do Programa de Monitoria da UFSCar](https://drive.google.com/drive/folders/1KD-pdkrKwo-ZX3BRwBnqRgv7GwE4GL8G?usp=share_link) utilizado pela Resolução COG No 316, de 10 de fevereiro de 2020 ou em documento mais atualizado. Aquele procedimento define que:
 
-   $$
+   ```math
    P_{i} = \frac{Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i}}{P_T}
-   $$
+   ```
 
    Em que: $P_{T} = \sum_{i}(Q_{I_i} + Q_{R_i} + Q_{T_i} + Q_{P_i} + N_{T_i})$ é o fator de normalização; $Q_{I_i}$ é a quantidade de inscrições em atividades no $i$-ésimo departamento nos últimos 5 anos; $Q_{R_i}$ é a quantidade de reprovações no $i$-ésimo departamento nos últimos 5 anos; $Q_{T_i}$ é a quantidade de créditos teóricos no $i$-ésimo departamento nos últimos 5 anos; $Q_{P_i}$ é a quantidade de créditos práticos no $i$-ésimo departamento nos últimos 5 anos; $N_{T_i}$ é a quantidade de turmas ofertadas pelo $i$-ésimo departamento nos últimos 5 anos.
 
@@ -45,9 +48,9 @@ Para acessar a página da proposta [clique aqui](https://jocoteles.github.io/Bol
 
    **Item 5.8.2:** Define-se $B_{G_i}$ como sendo a quantidade mínima de bolsas garantidas para o $i$-ésimo departamento, calculado por:
 
-   $$
+   ```math
    B_{G_i} = P_{i}B_{D}
-   $$
+   ```
 
    **Item 5.8.3:** O $i$-ésimo departamento que apresentar, simultaneamente, $B_{G_i} < 1$ e $B_{SR_i} \geq 1$ terá a sua quantidade mínima de bolsas garantidas corrigida para $B_{G_i} = 1$.
 
@@ -55,9 +58,9 @@ Para acessar a página da proposta [clique aqui](https://jocoteles.github.io/Bol
 
    **Item 5.8.5:** A distribuição das bolsas entre os departamentos deverá minimizar a diferença quadrática $\sigma^2$ entre o número de bolsas disponibilizadas para o $i$-ésimo departamento e $B_{G_i}$:
 
-   $$
+   ```math
    \sigma^{2}=\underset{B_{D_i}}{\text{min}} \sum_{i}{\left(B_{D_i} - B_{G_i}\right)^{2}}
-   $$
+   ```
 
    **Item 5.8.6:** Caso haja mais que um conjunto $B_{D_i}$ com mesmo valor de $\sigma^2$ mínimo, deverão ser aplicados os critérios de desempate especificados no item Critérios de desempate.
 
