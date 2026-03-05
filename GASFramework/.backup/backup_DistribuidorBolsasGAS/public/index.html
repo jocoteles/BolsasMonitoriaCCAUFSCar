@@ -361,6 +361,7 @@
           state.departments = (data.departments || []).sort();
           state.disciplinesByDept = data.disciplinesByDept || {};
 
+          document.getElementById('user-email').textContent = state.userEmail || 'Anônimo';
           document.getElementById('user-dept').textContent = state.userDept || 'Somente leitura';
           updateAccessBadge();
           bindSettings();
