@@ -1,3 +1,6 @@
-No card de Disciplinas por departamento, todos os departamentos devem ficar visíveis sem botão de seleção. Coloque um seguido do outro verticalmente, separados por um fieldset por departamento. Distribua-os em ordem alfabética.
-
-Implemente salvamento automático dos dados sem precisar do botão "Salvar Dados" que deve ser retirado da interface. Mas coloque uma mensagem clara de que os dados atuais foram salvos ou não. Pode fazer essa checagem quando houver edição de campo.
+Para as solicitações a seguir, utilize o arquivo @historico_distribuicao.txt como rferência.
+No card Parâmetros gerais, inclua:
+- as opções mutuamente excludentes DRNPA [X/Y] (default) e DRNPA [2/2|0].
+- os critérios de simulação mutuamente excludentes (agora chame-os de Critérios de Otimização): Otimização com StDA (acumulado até o semestre) (default) e Otimização com StD (semestres isolados). Para o cálculo do StDA, use o arquivo @historico_distribuicao.txt.
+- substitua o algoritmo atual de otimização pelo contido em @index_referencia.html.
+- Nos resultados da otimização inclua o resultado de cada departamento listado da seguinte forma: X/Y(Z), onde X é o número de bolsas atendidas, Y é o peso total somado das disciplinas solicitadas e Z é o total de disciplinas solicitadas. Por exemplo: se um departamento solicitou uma disciplina com CT=2 e CP=2 e outra com CT=4 e CP=0 e foi atendido com duas bolsas, o resultado será 2/2,5(2). Pois toda disciplina recebe uma soma no seu peso igual a CP/(CT+CP).

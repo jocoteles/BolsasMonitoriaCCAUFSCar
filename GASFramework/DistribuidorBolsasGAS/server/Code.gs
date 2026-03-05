@@ -13,6 +13,8 @@ const DEFAULT_REPRESENTANTES = [
   { dept: 'DRNPA', nome: 'Representante DRNPA', emails: ['email@exemplo.com'] }
 ];
 
+const HIST_FILE = 'historico_distribuicoes.txt';
+
 const SHEET_REP = 'Representantes';
 const SHEET_DISC = 'Disciplinas';
 
@@ -209,47 +211,58 @@ function validateDisciplines_(disciplines) {
 
 function computeDistributions_(departments, disciplinesByDept, settings) {
   const requests = {};
+  const deptDetails = {};
   const disciplinesWithWeight = {};
+
   departments.forEach(dept => {
     const list = disciplinesByDept[dept] || [];
-    let sum = 0;
+    let sumWeight = 0;
     disciplinesWithWeight[dept] = list.map(d => {
       const ct = Number(d.ct || 0);
       const cp = Number(d.cp || 0);
-      const weight = ct + cp > 0 ? 1 + (cp / (ct + cp)) : 0;
-      sum += weight;
+      const weight = ct + cp > 0 ? (cp / (ct + cp)) : 0;
+      const combinedWeight = 1 + weight; // Based on the description 1 + CP/(CT+CP)
+      sumWeight += combinedWeight;
       return {
         codigo: d.codigo,
         disciplina: d.disciplina,
         professor: d.professor,
         ct: ct,
         cp: cp,
-        peso: weight
+        peso: combinedWeight
       };
     });
-    requests[dept] = sum;
+    requests[dept] = sumWeight;
+    deptDetails[dept] = {
+      weight: sumWeight,
+      count: list.length
+    };
   });
 
   const semester = settings.semester === 'even' ? 'even' : 'odd';
   const totalBolsas = clampInt_(settings.totalBolsas, 1, 30);
   const nMelhores = clampInt_(settings.nMelhores, 1, 10);
+  const drnpaMode = settings.drnpaMode || 'random';
+  const optMode = settings.optMode || 'stda';
 
   let active = departments.filter(dept => requests[dept] > 0);
   if (semester === 'even') {
     active = active.filter(dept => dept !== 'DRNPA');
   }
 
-  const minAlloc = {};
-  active.forEach(dept => { minAlloc[dept] = 1; });
-  if (semester === 'odd' && active.indexOf('DRNPA') >= 0) {
-    minAlloc['DRNPA'] = 2;
+  // Handle DRNPA 2/2|0 rule
+  let adjustedTotal = totalBolsas;
+  let fixedAlloc = {};
+  if (semester === 'odd' && drnpaMode === '2|0' && active.indexOf('DRNPA') >= 0) {
+    fixedAlloc['DRNPA'] = 2;
+    adjustedTotal -= 2;
+    active = active.filter(dept => dept !== 'DRNPA');
   }
 
-  const minSum = active.reduce((acc, dept) => acc + (minAlloc[dept] || 0), 0);
-  if (totalBolsas < minSum) {
+  if (adjustedTotal < 0) {
     return {
       ok: false,
-      error: 'Bolsas disponíveis insuficientes para atender os mínimos (' + minSum + ').',
+      error: 'Bolsas insuficientes para a regra fixa do DRNPA.',
       settings: settings,
       departments: departments,
       requests: requests,
@@ -258,7 +271,7 @@ function computeDistributions_(departments, disciplinesByDept, settings) {
     };
   }
 
-  if (!active.length) {
+  if (!active.length && Object.keys(fixedAlloc).length === 0) {
     return {
       ok: false,
       error: 'Nenhum departamento ativo com solicitações.',
@@ -270,32 +283,62 @@ function computeDistributions_(departments, disciplinesByDept, settings) {
     };
   }
 
-  const residual = totalBolsas - minSum;
-  const activeRequests = active.map(dept => requests[dept]);
+  // Load history for StDA
+  let historical = { cumAlloc: {}, cumReq: {} };
+  departments.forEach(d => { historical.cumAlloc[d] = 0; historical.cumReq[d] = 0; });
+  if (optMode === 'stda') {
+    historical = parseHistory_();
+  }
 
-  const allResults = [];
-  compositions_(residual, active.length, function(parts) {
-    const alloc = parts.map((v, idx) => v + (minAlloc[active[idx]] || 0));
-    const ratios = alloc.map((v, idx) => v / activeRequests[idx]);
-    const sd = ratios.length >= 2 ? stdev_(ratios) : 0;
-    allResults.push({ alloc: alloc, sd: sd });
-  });
+  const minAlloc = active.map(() => 1);
+  const maxAlloc = active.map(dept => Math.max(1, Math.ceil(requests[dept]))); // Max is solicitation ceiling
 
-  allResults.sort(function(a, b) { return a.sd - b.sd; });
-  const limited = allResults.slice(0, Math.min(nMelhores, allResults.length));
+  const scoreFn = (allocArray) => {
+    const currentAlloc = {};
+    active.forEach((dept, i) => { currentAlloc[dept] = allocArray[i]; });
+
+    const ratios = [];
+    if (optMode === 'stda') {
+      departments.forEach(dept => {
+        let a = (historical.cumAlloc[dept] || 0) + (currentAlloc[dept] || fixedAlloc[dept] || 0);
+        let r = (historical.cumReq[dept] || 0) + (requests[dept] || 0);
+        if (r > 0) ratios.push(a / r);
+      });
+    } else {
+      active.forEach((dept, i) => {
+        if (requests[dept] > 0) ratios.push(allocArray[i] / requests[dept]);
+      });
+      // Include fixed DRNPA in ratio calculation if applicable? 
+      // Usually StD is just for the current semester's active departments.
+      if (fixedAlloc['DRNPA'] && requests['DRNPA'] > 0) ratios.push(fixedAlloc['DRNPA'] / requests['DRNPA']);
+    }
+    return stdev_(ratios);
+  };
+
+  const bestResults = exactSearch_(minAlloc, maxAlloc, adjustedTotal, scoreFn);
+
+  if (!bestResults || bestResults.length === 0) {
+    // If exactSearch found nothing (e.g. adjustedTotal out of bounds), allow some results
+    // This shouldn't happen with proper bounds.
+    return {
+      ok: false,
+      error: 'Nenhuma distribuição possível com os parâmetros informados.',
+      settings: settings,
+      results: []
+    };
+  }
+
+  const limited = bestResults.slice(0, nMelhores);
 
   const results = limited.map(r => {
     const allocByDept = {};
-    departments.forEach(dept => { allocByDept[dept] = 0; });
+    departments.forEach(dept => { allocByDept[dept] = fixedAlloc[dept] || 0; });
     active.forEach((dept, idx) => { allocByDept[dept] = r.alloc[idx]; });
-    const ratiosByDept = {};
-    departments.forEach(dept => {
-      ratiosByDept[dept] = requests[dept] > 0 ? (allocByDept[dept] / requests[dept]) : null;
-    });
+
     return {
       allocByDept: allocByDept,
-      ratiosByDept: ratiosByDept,
-      sd: r.sd
+      deptDetails: deptDetails,
+      sd: r.score
     };
   });
 
@@ -310,13 +353,90 @@ function computeDistributions_(departments, disciplinesByDept, settings) {
   };
 }
 
+function parseHistory_() {
+  const cumAlloc = {};
+  const cumReq = {};
+  try {
+    const text = HISTORICAL_DATA_RAW;
+    const lines = text.split(/\r?\n/).map(l => l.trimEnd());
+
+    let deptNames = [];
+    let headerIdx = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      if (headerIdx === -1 && !/^\d{4}\/[12]:/.test(line)) {
+        headerIdx = i;
+        deptNames = line.split(/\s{2,}/).filter(Boolean).filter(n => n !== 'StD');
+        continue;
+      }
+
+      const m = line.match(/^(\d{4}\/[12]):\s*(.*)$/);
+      if (!m) continue;
+      const values = m[2].split(/\s{2,}/).filter(Boolean);
+      for (let d = 0; d < deptNames.length; d++) {
+        const part = values[d] || '';
+        const mPart = part.match(/\((\d+)\/(\d+)\)/);
+        if (mPart) {
+          const x = parseInt(mPart[1], 10);
+          const y = parseInt(mPart[2], 10);
+          const name = deptNames[d];
+          cumAlloc[name] = (cumAlloc[name] || 0) + x;
+          cumReq[name] = (cumReq[name] || 0) + y;
+        }
+      }
+    }
+  } catch (e) {
+    Logger.log('Erro ao ler historico: ' + e.message);
+  }
+  return { cumAlloc, cumReq };
+}
+
+function exactSearch_(minAlloc, maxAlloc, target, scoreFn) {
+  const n = minAlloc.length;
+  const suffixMin = Array(n + 1).fill(0);
+  const suffixMax = Array(n + 1).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    suffixMin[i] = suffixMin[i + 1] + minAlloc[i];
+    suffixMax[i] = suffixMax[i + 1] + maxAlloc[i];
+  }
+
+  const results = [];
+  const current = Array(n).fill(0);
+
+  function dfs(i, remaining) {
+    if (i === n) {
+      if (remaining === 0) {
+        results.push({ alloc: current.slice(), score: scoreFn(current) });
+      }
+      return;
+    }
+
+    const minH = Math.max(minAlloc[i], remaining - suffixMax[i + 1]);
+    const maxH = Math.min(maxAlloc[i], remaining - suffixMin[i + 1]);
+
+    for (let v = minH; v <= maxH; v++) {
+      current[i] = v;
+      dfs(i + 1, remaining - v);
+    }
+  }
+
+  if (target >= suffixMin[0] && target <= suffixMax[0]) {
+    dfs(0, target);
+  }
+
+  results.sort((a, b) => a.score - b.score);
+  return results;
+}
+
 function compositions_(total, parts, callback) {
   if (parts === 1) {
     callback([total]);
     return;
   }
   for (let i = 0; i <= total; i++) {
-    compositions_(total - i, parts - 1, function(rest) {
+    compositions_(total - i, parts - 1, function (rest) {
       callback([i].concat(rest));
     });
   }
@@ -356,14 +476,14 @@ function buildPdfHtml_(classification) {
   html += '</style></head><body>';
   html += '<h1>Distribuição de Bolsas - Disciplinas por Departamento</h1>';
 
-  dpts.forEach(function(dept) {
+  dpts.forEach(function (dept) {
     html += '<h2>' + dept + '</h2>';
     html += '<table><thead><tr><th>Código</th><th>Disciplina</th><th>Professor</th><th>CT</th><th>CP</th><th>Peso</th></tr></thead><tbody>';
     const list = disciplines[dept] || [];
     if (!list.length) {
       html += '<tr><td colspan="6">Sem disciplinas</td></tr>';
     } else {
-      list.forEach(function(d) {
+      list.forEach(function (d) {
         html += '<tr><td>' + esc_(d.codigo) + '</td><td>' + esc_(d.disciplina) + '</td><td>' + esc_(d.professor) + '</td><td>' + d.ct + '</td><td>' + d.cp + '</td><td>' + d.peso.toFixed(2) + '</td></tr>';
       });
     }
@@ -375,11 +495,19 @@ function buildPdfHtml_(classification) {
     html += '<p>Sem resultados.</p>';
   } else {
     html += '<table><thead><tr>';
-    dpts.forEach(function(d) { html += '<th>' + d + '</th>'; });
+    dpts.forEach(function (d) { html += '<th>' + d + '</th>'; });
     html += '<th>Desvio</th></tr></thead><tbody>';
-    results.forEach(function(r) {
+    results.forEach(function (r) {
       html += '<tr>';
-      dpts.forEach(function(d) { html += '<td>' + (r.allocByDept[d] || 0) + '</td>'; });
+      dpts.forEach(function (d) {
+        const detail = r.deptDetails && r.deptDetails[d];
+        const val = r.allocByDept[d] || 0;
+        if (detail) {
+          html += '<td>' + val + '/' + detail.weight.toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + '(' + detail.count + ')</td>';
+        } else {
+          html += '<td>' + val + '</td>';
+        }
+      });
       html += '<td>' + r.sd.toFixed(4) + '</td>';
       html += '</tr>';
     });

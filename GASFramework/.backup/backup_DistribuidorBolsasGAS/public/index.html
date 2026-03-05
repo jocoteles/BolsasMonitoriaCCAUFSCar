@@ -283,438 +283,497 @@
           <label>Nº melhores distribuições</label>
           <input type="number" id="n-melhores" min="1" max="10" />
         </div>
+        <div class="row" style="margin-top: 12px;">
+          <div style="flex: 1;">
+            <label>Regra DRNPA</label>
+            <div class="row" style="gap: 15px;">
+              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <input type="radio" name="drnpa-mode" value="random" checked /> DRNPA [X/Y]
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <input type="radio" name="drnpa-mode" value="2|0" /> DRNPA [2/2|0]
+              </label>
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <label>Critério de Otimização</label>
+            <div class="row" style="gap: 15px;">
+              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <input type="radio" name="opt-mode" value="stda" checked /> StDA (acumulado)
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <input type="radio" name="opt-mode" value="std" /> StD (isolado)
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="summary" id="semester-hint" style="margin-top: 12px;"></div>
       </div>
-      <div class="summary" id="semester-hint"></div>
+
+      <div class="panel">
+        <h2>Disciplinas por departamento</h2>
+        <div id="auto-save-info" class="auto-save-status"></div>
+        <div id="dept-content"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Classificação</h2>
+        <div class="row" style="gap: 10px;">
+          <button class="button secondary" id="btn-generate">Gerar classificação</button>
+          <button class="button ghost" id="btn-pdf" disabled>Gerar PDF</button>
+        </div>
+        <div id="message-box" style="margin-top: 12px;"></div>
+        <div id="results" style="margin-top: 16px;"></div>
+
+        <div class="footer-text">
+          <p>Conforme deliberado em reunião da Comissão de Monitoria do CCA/UFSCar realizada em 24/02/2026 às 14h:</p>
+          <ul>
+            <li>No cálculo das distribuições com menores desvios quadráticos foi atribuído o seguinte peso para cada
+              disciplina: P = 1 + CP/(CT + CP), em que CT e CP são os números de créditos teóricos e de créditos
+              práticos,
+              respectivamente.</li>
+            <li>Havendo menos bolsas do que solicitações, nenhuma das disciplinas aqui solicitadas deve ser optativa.
+            </li>
+            <li>O DRNPA concentra as suas duas bolsas - que todos os departamentos possuem direito por ano - apenas nos
+              semestres ímpares, não fazendo solicitações nos semestres pares.</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
-    <div class="panel">
-      <h2>Disciplinas por departamento</h2>
-      <div id="auto-save-info" class="auto-save-status"></div>
-      <div id="dept-content"></div>
-    </div>
+    <script>
+      const state = {
+        userEmail: '',
+        userDept: null,
+        departments: [],
+        settings: { semester: 'odd', totalBolsas: 12, nMelhores: 10 },
+        disciplinesByDept: {},
+        activeDept: null,
+        lastClassification: null,
+        drnpaMode: 'random',
+        optMode: 'stda'
+      };
 
-    <div class="panel">
-      <h2>Classificação</h2>
-      <div class="row" style="gap: 10px;">
-        <button class="button secondary" id="btn-generate">Gerar classificação</button>
-        <button class="button ghost" id="btn-pdf" disabled>Gerar PDF</button>
-      </div>
-      <div id="message-box" style="margin-top: 12px;"></div>
-      <div id="results" style="margin-top: 16px;"></div>
+      function init() {
+        google.script.run.withSuccessHandler(function (data) {
+          state.userEmail = data.userEmail || '';
+          state.userDept = data.userDept || null;
+          state.departments = (data.departments || []).sort();
+          state.disciplinesByDept = data.disciplinesByDept || {};
 
-      <div class="footer-text">
-        <p>Conforme deliberado em reunião da Comissão de Monitoria do CCA/UFSCar realizada em 24/02/2026 às 14h:</p>
-        <ul>
-          <li>No cálculo das distribuições com menores desvios quadráticos foi atribuído o seguinte peso para cada
-            disciplina: P = 1 + CP/(CT + CP), em que CT e CP são os números de créditos teóricos e de créditos práticos,
-            respectivamente.</li>
-          <li>Havendo menos bolsas do que solicitações, nenhuma das disciplinas aqui solicitadas deve ser optativa.</li>
-          <li>O DRNPA concentra as suas duas bolsas - que todos os departamentos possuem direito por ano - apenas nos
-            semestres ímpares, não fazendo solicitações nos semestres pares.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const state = {
-      userEmail: '',
-      userDept: null,
-      departments: [],
-      settings: { semester: 'odd', totalBolsas: 12, nMelhores: 10 },
-      disciplinesByDept: {},
-      activeDept: null,
-      lastClassification: null
-    };
-
-    function init() {
-      google.script.run.withSuccessHandler(function (data) {
-        state.userEmail = data.userEmail || '';
-        state.userDept = data.userDept || null;
-        state.departments = (data.departments || []).sort();
-        state.disciplinesByDept = data.disciplinesByDept || {};
-
-        document.getElementById('user-dept').textContent = state.userDept || 'Somente leitura';
-        updateAccessBadge();
-        bindSettings();
-        renderDepartments();
-      }).withFailureHandler(showError).getAppData();
-    }
-
-    function updateAccessBadge() {
-      const badge = document.getElementById('access-badge');
-      if (state.userDept) {
-        badge.textContent = 'Edição liberada para ' + state.userDept;
-      } else {
-        badge.textContent = 'Acesso somente leitura';
+          document.getElementById('user-dept').textContent = state.userDept || 'Somente leitura';
+          updateAccessBadge();
+          bindSettings();
+          renderDepartments();
+        }).withFailureHandler(showError).getAppData();
       }
-    }
 
-    function bindSettings() {
-      const semesterSelect = document.getElementById('semester-select');
-      const totalBolsas = document.getElementById('total-bolsas');
-      const nMelhores = document.getElementById('n-melhores');
+      function updateAccessBadge() {
+        const badge = document.getElementById('access-badge');
+        if (state.userDept) {
+          badge.textContent = 'Edição liberada para ' + state.userDept;
+        } else {
+          badge.textContent = 'Acesso somente leitura';
+        }
+      }
 
-      semesterSelect.value = state.settings.semester || 'odd';
-      totalBolsas.value = state.settings.totalBolsas || 12;
-      nMelhores.value = state.settings.nMelhores || 10;
+      function bindSettings() {
+        const semesterSelect = document.getElementById('semester-select');
+        const totalBolsas = document.getElementById('total-bolsas');
+        const nMelhores = document.getElementById('n-melhores');
 
-      semesterSelect.onchange = function () {
-        state.settings.semester = semesterSelect.value;
-        renderDepartments();
+        semesterSelect.value = state.settings.semester || 'odd';
+        totalBolsas.value = state.settings.totalBolsas || 12;
+        nMelhores.value = state.settings.nMelhores || 10;
+
+        semesterSelect.onchange = function () {
+          state.settings.semester = semesterSelect.value;
+          renderDepartments();
+          updateSemesterHint();
+          triggerAutoSave();
+        };
+
+        totalBolsas.oninput = function () {
+          state.settings.totalBolsas = Number(totalBolsas.value || 0);
+          triggerAutoSave();
+        };
+
+        nMelhores.oninput = function () {
+          state.settings.nMelhores = Number(nMelhores.value || 0);
+          triggerAutoSave();
+        };
+
+        const drnpaRadios = document.querySelectorAll('input[name="drnpa-mode"]');
+        drnpaRadios.forEach(r => {
+          r.onchange = function () {
+            state.drnpaMode = this.value;
+            updateSemesterHint();
+            triggerAutoSave();
+          };
+        });
+
+        const optRadios = document.querySelectorAll('input[name="opt-mode"]');
+        optRadios.forEach(r => {
+          r.onchange = function () {
+            state.optMode = this.value;
+            triggerAutoSave();
+          };
+        });
+
         updateSemesterHint();
-        triggerAutoSave();
-      };
-
-      totalBolsas.oninput = function () {
-        state.settings.totalBolsas = Number(totalBolsas.value || 0);
-        triggerAutoSave();
-      };
-
-      nMelhores.oninput = function () {
-        state.settings.nMelhores = Number(nMelhores.value || 0);
-        triggerAutoSave();
-      };
-
-      updateSemesterHint();
-    }
-
-    function updateSemesterHint() {
-      const hint = document.getElementById('semester-hint');
-      if (state.settings.semester === 'even') {
-        hint.textContent = 'Semestre par: DRNPA não participa das solicitações.';
-      } else {
-        hint.textContent = 'Semestre ímpar: DRNPA deve receber no mínimo 2 bolsas, se houver solicitações.';
-      }
-    }
-
-    function renderDepartments() {
-      const content = document.getElementById('dept-content');
-      content.innerHTML = '';
-
-      const visibleDepts = getVisibleDepartments();
-      if (!visibleDepts.length) {
-        content.innerHTML = '<div class="message">Nenhum departamento ativo.</div>';
-        return;
       }
 
-      visibleDepts.forEach(dept => {
-        const fieldset = document.createElement('fieldset');
-        const legend = document.createElement('legend');
-        legend.textContent = dept;
-        fieldset.appendChild(legend);
+      function updateSemesterHint() {
+        const hint = document.getElementById('semester-hint');
+        const isEven = state.settings.semester === 'even';
+        const drnpa2 = state.drnpaMode === '2|0';
 
-        renderDepartmentInFieldset(dept, fieldset);
-        content.appendChild(fieldset);
-      });
-    }
-
-    function getVisibleDepartments() {
-      const depts = state.settings.semester === 'even'
-        ? state.departments.filter(d => d !== 'DRNPA')
-        : state.departments.slice();
-      return depts;
-    }
-
-    function renderDepartmentInFieldset(dept, container) {
-      const canEdit = state.userDept === dept;
-      const list = state.disciplinesByDept[dept] || [];
-
-      const headerRow = document.createElement('div');
-      headerRow.className = 'row';
-      headerRow.style.justifyContent = 'space-between';
-      headerRow.style.marginBottom = '12px';
-
-      const summary = document.createElement('div');
-      summary.className = 'summary';
-      summary.style.marginTop = '0';
-      summary.textContent = 'Solicitação ponderada: ' + totalWeight(list).toFixed(2);
-      headerRow.appendChild(summary);
-
-      if (canEdit) {
-        const addButton = document.createElement('button');
-        addButton.className = 'button ghost';
-        addButton.textContent = 'Adicionar disciplina';
-        addButton.onclick = function () {
-          list.push({ codigo: '', disciplina: '', professor: '', ct: 0, cp: 0 });
-          renderDepartments();
-          triggerAutoSave();
-        };
-        headerRow.appendChild(addButton);
-      }
-      container.appendChild(headerRow);
-
-      if (!list.length) {
-        const empty = document.createElement('div');
-        empty.className = 'message';
-        empty.textContent = 'Nenhuma disciplina cadastrada.';
-        container.appendChild(empty);
-        return;
-      }
-
-      list.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'discipline-row';
-
-        const code = makeInput('codigo', item.codigo, canEdit, '000000');
-        const disc = makeInput('disciplina', item.disciplina, canEdit, 'Nome da disciplina');
-        const prof = makeInput('professor', item.professor, canEdit, 'Professor');
-        const ct = makeNumber('ct', item.ct, canEdit);
-        const cp = makeNumber('cp', item.cp, canEdit);
-
-        code.oninput = () => { item.codigo = code.value; triggerAutoSave(); };
-        disc.oninput = () => { item.disciplina = disc.value; triggerAutoSave(); };
-        prof.oninput = () => { item.professor = prof.value; triggerAutoSave(); };
-        ct.oninput = () => { item.ct = Number(ct.value || 0); updateWeights(dept); triggerAutoSave(); };
-        cp.oninput = () => { item.cp = Number(cp.value || 0); updateWeights(dept); triggerAutoSave(); };
-
-        const weight = document.createElement('div');
-        weight.id = `weight-${dept}-${idx}`;
-        weight.className = 'weight-pill';
-        weight.textContent = weightOf(item).toFixed(2);
-
-        row.appendChild(wrapField('Código', code));
-        row.appendChild(wrapField('Disciplina', disc));
-        row.appendChild(wrapField('Professor', prof));
-        row.appendChild(wrapField('CT', ct));
-        row.appendChild(wrapField('CP', cp));
-        row.appendChild(weight);
-
-        const trash = document.createElement('button');
-        trash.className = 'trash';
-        trash.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
-        trash.disabled = !canEdit;
-        trash.onclick = () => {
-          list.splice(idx, 1);
-          renderDepartments();
-          triggerAutoSave();
-        };
-        row.appendChild(trash);
-
-        container.appendChild(row);
-      });
-
-      const validation = validateDepartment(list);
-      if (!validation.ok) {
-        const warn = document.createElement('div');
-        warn.className = 'message error';
-        warn.textContent = validation.error;
-        container.appendChild(warn);
-      }
-    }
-
-    function updateWeights(dept) {
-      const list = state.disciplinesByDept[dept] || [];
-      list.forEach((item, idx) => {
-        const el = document.getElementById(`weight-${dept}-${idx}`);
-        if (el) el.textContent = weightOf(item).toFixed(2);
-      });
-      // We don't re-render everything to avoid losing focus, but we might need to update total weight
-      renderDepartments(); // Re-rendering for now to keep it simple, but we should handle focus.
-    }
-
-    function makeInput(name, value, enabled, placeholder) {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.value = value || '';
-      input.placeholder = placeholder || '';
-      input.disabled = !enabled;
-      return input;
-    }
-
-    function makeNumber(name, value, enabled) {
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.min = 0;
-      input.max = 6;
-      input.value = value || 0;
-      input.disabled = !enabled;
-      return input;
-    }
-
-    function wrapField(label, field) {
-      const wrapper = document.createElement('div');
-      const lab = document.createElement('label');
-      lab.textContent = label;
-      wrapper.appendChild(lab);
-      wrapper.appendChild(field);
-      return wrapper;
-    }
-
-    function totalWeight(list) {
-      return list.reduce((acc, d) => acc + weightOf(d), 0);
-    }
-
-    function weightOf(item) {
-      const ct = Number(item.ct || 0);
-      const cp = Number(item.cp || 0);
-      if (ct + cp <= 0) return 0;
-      return 1 + cp / (ct + cp);
-    }
-
-    function validateDepartment(list) {
-      for (let i = 0; i < list.length; i++) {
-        const d = list[i];
-        if (isEmptyDiscipline(d)) {
-          continue;
+        let text = isEven ? 'Semestre par: DRNPA não participa das solicitações.' : 'Semestre ímpar: DRNPA participa.';
+        if (!isEven && drnpa2) {
+          text += ' (Regra 2/2|0: DRNPA recebe exatamente 2 bolsas)';
         }
-        if (!/^\d{6}$/.test(String(d.codigo || ''))) {
-          return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
+        hint.textContent = text;
+      }
+
+      function renderDepartments() {
+        const content = document.getElementById('dept-content');
+        content.innerHTML = '';
+
+        const visibleDepts = getVisibleDepartments();
+        if (!visibleDepts.length) {
+          content.innerHTML = '<div class="message">Nenhum departamento ativo.</div>';
+          return;
         }
+
+        visibleDepts.forEach(dept => {
+          const fieldset = document.createElement('fieldset');
+          const legend = document.createElement('legend');
+          legend.textContent = dept;
+          fieldset.appendChild(legend);
+
+          renderDepartmentInFieldset(dept, fieldset);
+          content.appendChild(fieldset);
+        });
+      }
+
+      function getVisibleDepartments() {
+        const depts = state.settings.semester === 'even'
+          ? state.departments.filter(d => d !== 'DRNPA')
+          : state.departments.slice();
+        return depts;
+      }
+
+      function renderDepartmentInFieldset(dept, container) {
+        const canEdit = state.userDept === dept;
+        const list = state.disciplinesByDept[dept] || [];
+
+        const headerRow = document.createElement('div');
+        headerRow.className = 'row';
+        headerRow.style.justifyContent = 'space-between';
+        headerRow.style.marginBottom = '12px';
+
+        const summary = document.createElement('div');
+        summary.className = 'summary';
+        summary.style.marginTop = '0';
+        summary.textContent = 'Solicitação ponderada: ' + totalWeight(list).toFixed(2);
+        headerRow.appendChild(summary);
+
+        if (canEdit) {
+          const addButton = document.createElement('button');
+          addButton.className = 'button ghost';
+          addButton.textContent = 'Adicionar disciplina';
+          addButton.onclick = function () {
+            list.push({ codigo: '', disciplina: '', professor: '', ct: 0, cp: 0 });
+            renderDepartments();
+            triggerAutoSave();
+          };
+          headerRow.appendChild(addButton);
+        }
+        container.appendChild(headerRow);
+
+        if (!list.length) {
+          const empty = document.createElement('div');
+          empty.className = 'message';
+          empty.textContent = 'Nenhuma disciplina cadastrada.';
+          container.appendChild(empty);
+          return;
+        }
+
+        list.forEach((item, idx) => {
+          const row = document.createElement('div');
+          row.className = 'discipline-row';
+
+          const code = makeInput('codigo', item.codigo, canEdit, '000000');
+          const disc = makeInput('disciplina', item.disciplina, canEdit, 'Nome da disciplina');
+          const prof = makeInput('professor', item.professor, canEdit, 'Professor');
+          const ct = makeNumber('ct', item.ct, canEdit);
+          const cp = makeNumber('cp', item.cp, canEdit);
+
+          code.oninput = () => { item.codigo = code.value; triggerAutoSave(); };
+          disc.oninput = () => { item.disciplina = disc.value; triggerAutoSave(); };
+          prof.oninput = () => { item.professor = prof.value; triggerAutoSave(); };
+          ct.oninput = () => { item.ct = Number(ct.value || 0); updateWeights(dept); triggerAutoSave(); };
+          cp.oninput = () => { item.cp = Number(cp.value || 0); updateWeights(dept); triggerAutoSave(); };
+
+          const weight = document.createElement('div');
+          weight.id = `weight-${dept}-${idx}`;
+          weight.className = 'weight-pill';
+          weight.textContent = weightOf(item).toFixed(2);
+
+          row.appendChild(wrapField('Código', code));
+          row.appendChild(wrapField('Disciplina', disc));
+          row.appendChild(wrapField('Professor', prof));
+          row.appendChild(wrapField('CT', ct));
+          row.appendChild(wrapField('CP', cp));
+          row.appendChild(weight);
+
+          const trash = document.createElement('button');
+          trash.className = 'trash';
+          trash.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
+          trash.disabled = !canEdit;
+          trash.onclick = () => {
+            list.splice(idx, 1);
+            renderDepartments();
+            triggerAutoSave();
+          };
+          row.appendChild(trash);
+
+          container.appendChild(row);
+        });
+
+        const validation = validateDepartment(list);
+        if (!validation.ok) {
+          const warn = document.createElement('div');
+          warn.className = 'message error';
+          warn.textContent = validation.error;
+          container.appendChild(warn);
+        }
+      }
+
+      function updateWeights(dept) {
+        const list = state.disciplinesByDept[dept] || [];
+        list.forEach((item, idx) => {
+          const el = document.getElementById(`weight-${dept}-${idx}`);
+          if (el) el.textContent = weightOf(item).toFixed(2);
+        });
+        // We don't re-render everything to avoid losing focus, but we might need to update total weight
+        renderDepartments(); // Re-rendering for now to keep it simple, but we should handle focus.
+      }
+
+      function makeInput(name, value, enabled, placeholder) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value || '';
+        input.placeholder = placeholder || '';
+        input.disabled = !enabled;
+        return input;
+      }
+
+      function makeNumber(name, value, enabled) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = 0;
+        input.max = 6;
+        input.value = value || 0;
+        input.disabled = !enabled;
+        return input;
+      }
+
+      function wrapField(label, field) {
+        const wrapper = document.createElement('div');
+        const lab = document.createElement('label');
+        lab.textContent = label;
+        wrapper.appendChild(lab);
+        wrapper.appendChild(field);
+        return wrapper;
+      }
+
+      function totalWeight(list) {
+        return list.reduce((acc, d) => acc + weightOf(d), 0);
+      }
+
+      function weightOf(item) {
+        const ct = Number(item.ct || 0);
+        const cp = Number(item.cp || 0);
+        if (ct + cp <= 0) return 0;
+        return 1 + cp / (ct + cp);
+      }
+
+      function validateDepartment(list) {
+        for (let i = 0; i < list.length; i++) {
+          const d = list[i];
+          if (isEmptyDiscipline(d)) {
+            continue;
+          }
+          if (!/^\d{6}$/.test(String(d.codigo || ''))) {
+            return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
+          }
+          const ct = Number(d.ct || 0);
+          const cp = Number(d.cp || 0);
+          if (ct < 0 || ct > 6 || cp < 0 || cp > 6) {
+            return { ok: false, error: 'CT/CP devem estar entre 0 e 6 na disciplina #' + (i + 1) + '.' };
+          }
+          if (ct + cp < 1 || ct + cp > 6) {
+            return { ok: false, error: 'CT + CP deve estar entre 1 e 6 na disciplina #' + (i + 1) + '.' };
+          }
+        }
+        return { ok: true };
+      }
+
+      function isEmptyDiscipline(d) {
+        const code = String(d.codigo || '').trim();
+        const name = String(d.disciplina || '').trim();
+        const prof = String(d.professor || '').trim();
         const ct = Number(d.ct || 0);
         const cp = Number(d.cp || 0);
-        if (ct < 0 || ct > 6 || cp < 0 || cp > 6) {
-          return { ok: false, error: 'CT/CP devem estar entre 0 e 6 na disciplina #' + (i + 1) + '.' };
-        }
-        if (ct + cp < 1 || ct + cp > 6) {
-          return { ok: false, error: 'CT + CP deve estar entre 1 e 6 na disciplina #' + (i + 1) + '.' };
-        }
+        return !code && !name && !prof && ct === 0 && cp === 0;
       }
-      return { ok: true };
-    }
 
-    function isEmptyDiscipline(d) {
-      const code = String(d.codigo || '').trim();
-      const name = String(d.disciplina || '').trim();
-      const prof = String(d.professor || '').trim();
-      const ct = Number(d.ct || 0);
-      const cp = Number(d.cp || 0);
-      return !code && !name && !prof && ct === 0 && cp === 0;
-    }
+      function collectPayload() {
+        return {
+          settings: {
+            ...state.settings,
+            drnpaMode: state.drnpaMode,
+            optMode: state.optMode
+          },
+          disciplines: state.userDept
+            ? (state.disciplinesByDept[state.userDept] || []).filter(d => !isEmptyDiscipline(d))
+            : []
+        };
+      }
 
-    function collectPayload() {
-      return {
-        settings: state.settings,
-        disciplines: state.userDept
-          ? (state.disciplinesByDept[state.userDept] || []).filter(d => !isEmptyDiscipline(d))
-          : []
+      function showMessage(html, isError) {
+        const box = document.getElementById('message-box');
+        box.innerHTML = '';
+        if (!html) return;
+        const div = document.createElement('div');
+        div.className = 'message' + (isError ? ' error' : '');
+        div.innerHTML = html;
+        box.appendChild(div);
+      }
+
+      function showError(error) {
+        const message = (error && error.message) ? error.message : String(error || 'Erro desconhecido');
+        showMessage(message, true);
+      }
+
+      let saveTimeout = null;
+      function triggerAutoSave() {
+        if (!state.userDept) return;
+
+        const info = document.getElementById('auto-save-info');
+        info.textContent = 'Alterações pendentes...';
+
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(performSave, 1500);
+      }
+
+      function performSave() {
+        const info = document.getElementById('auto-save-info');
+        const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
+
+        if (!validation.ok) {
+          info.innerHTML = '<span style="color:var(--danger)">Erro: ' + validation.error + ' (Não salvo)</span>';
+          return;
+        }
+
+        info.textContent = 'Salvando...';
+        google.script.run.withSuccessHandler(function () {
+          const now = new Date().toLocaleTimeString();
+          info.textContent = 'Dados salvos automaticamente às ' + now;
+        }).withFailureHandler(function (err) {
+          info.innerHTML = '<span style="color:var(--danger)">Erro ao salvar: ' + (err.message || err) + '</span>';
+        }).saveAppData(collectPayload());
+      }
+
+      document.getElementById('btn-generate').onclick = function () {
+        if (!state.userDept) {
+          showMessage('Apenas representantes podem gerar classificação.', true);
+          return;
+        }
+        const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
+        if (!validation.ok) {
+          showMessage(validation.error, true);
+          return;
+        }
+
+        const info = document.getElementById('auto-save-info');
+        info.textContent = 'Salvando antes de gerar...';
+
+        google.script.run.withSuccessHandler(function () {
+          info.textContent = 'Dados salvos. Gerando classificação...';
+          google.script.run.withSuccessHandler(function (result) {
+            state.lastClassification = result;
+            renderResults();
+            showMessage(result.ok ? 'Classificação gerada.' : result.error, !result.ok);
+            document.getElementById('btn-pdf').disabled = !result.ok;
+            info.textContent = 'Classificação gerada com sucesso.';
+          }).withFailureHandler(showError).generateClassification({ settings: state.settings });
+        }).withFailureHandler(showError).saveAppData(collectPayload());
       };
-    }
 
-    function showMessage(html, isError) {
-      const box = document.getElementById('message-box');
-      box.innerHTML = '';
-      if (!html) return;
-      const div = document.createElement('div');
-      div.className = 'message' + (isError ? ' error' : '');
-      div.innerHTML = html;
-      box.appendChild(div);
-    }
+      document.getElementById('btn-pdf').onclick = function () {
+        if (!state.lastClassification) {
+          showMessage('Gere a classificação antes de exportar o PDF.', true);
+          return;
+        }
+        google.script.run.withSuccessHandler(function (fileInfo) {
+          showMessage('PDF gerado: ' + fileInfo.name + ' (link disponível no Drive).');
+        }).withFailureHandler(showError).generatePdf(state.lastClassification);
+      };
 
-    function showError(error) {
-      const message = (error && error.message) ? error.message : String(error || 'Erro desconhecido');
-      showMessage(message, true);
-    }
+      function renderResults() {
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+        const result = state.lastClassification;
+        if (!result || !result.results) return;
 
-    let saveTimeout = null;
-    function triggerAutoSave() {
-      if (!state.userDept) return;
+        if (!result.ok) {
+          container.innerHTML = '<div class="message error">' + result.error + '</div>';
+          return;
+        }
 
-      const info = document.getElementById('auto-save-info');
-      info.textContent = 'Alterações pendentes...';
-
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(performSave, 1500);
-    }
-
-    function performSave() {
-      const info = document.getElementById('auto-save-info');
-      const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
-
-      if (!validation.ok) {
-        info.innerHTML = '<span style="color:var(--danger)">Erro: ' + validation.error + ' (Não salvo)</span>';
-        return;
-      }
-
-      info.textContent = 'Salvando...';
-      google.script.run.withSuccessHandler(function () {
-        const now = new Date().toLocaleTimeString();
-        info.textContent = 'Dados salvos automaticamente às ' + now;
-      }).withFailureHandler(function (err) {
-        info.innerHTML = '<span style="color:var(--danger)">Erro ao salvar: ' + (err.message || err) + '</span>';
-      }).saveAppData(collectPayload());
-    }
-
-    document.getElementById('btn-generate').onclick = function () {
-      if (!state.userDept) {
-        showMessage('Apenas representantes podem gerar classificação.', true);
-        return;
-      }
-      const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
-      if (!validation.ok) {
-        showMessage(validation.error, true);
-        return;
-      }
-
-      const info = document.getElementById('auto-save-info');
-      info.textContent = 'Salvando antes de gerar...';
-
-      google.script.run.withSuccessHandler(function () {
-        info.textContent = 'Dados salvos. Gerando classificação...';
-        google.script.run.withSuccessHandler(function (result) {
-          state.lastClassification = result;
-          renderResults();
-          showMessage(result.ok ? 'Classificação gerada.' : result.error, !result.ok);
-          document.getElementById('btn-pdf').disabled = !result.ok;
-          info.textContent = 'Classificação gerada com sucesso.';
-        }).withFailureHandler(showError).generateClassification({ settings: state.settings });
-      }).withFailureHandler(showError).saveAppData(collectPayload());
-    };
-
-    document.getElementById('btn-pdf').onclick = function () {
-      if (!state.lastClassification) {
-        showMessage('Gere a classificação antes de exportar o PDF.', true);
-        return;
-      }
-      google.script.run.withSuccessHandler(function (fileInfo) {
-        showMessage('PDF gerado: ' + fileInfo.name + ' (link disponível no Drive).');
-      }).withFailureHandler(showError).generatePdf(state.lastClassification);
-    };
-
-    function renderResults() {
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-      const result = state.lastClassification;
-      if (!result || !result.results) return;
-
-      if (!result.ok) {
-        container.innerHTML = '<div class="message error">' + result.error + '</div>';
-        return;
-      }
-
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-      result.departments.forEach(dept => {
-        const th = document.createElement('th');
-        th.textContent = dept;
-        headerRow.appendChild(th);
-      });
-      const thSd = document.createElement('th');
-      thSd.textContent = 'Desvio';
-      headerRow.appendChild(thSd);
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      result.results.forEach(r => {
-        const tr = document.createElement('tr');
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
         result.departments.forEach(dept => {
-          const td = document.createElement('td');
-          td.textContent = r.allocByDept[dept] || 0;
-          tr.appendChild(td);
+          const th = document.createElement('th');
+          th.textContent = dept;
+          headerRow.appendChild(th);
         });
-        const tdSd = document.createElement('td');
-        tdSd.textContent = r.sd.toFixed(4);
-        tr.appendChild(tdSd);
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      container.appendChild(table);
-    }
+        const thSd = document.createElement('th');
+        thSd.textContent = 'Desvio';
+        headerRow.appendChild(thSd);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
 
-    window.onload = init;
-  </script>
+        const tbody = document.createElement('tbody');
+        result.results.forEach(r => {
+          const tr = document.createElement('tr');
+          result.departments.forEach(dept => {
+            const td = document.createElement('td');
+            const detail = r.deptDetails && r.deptDetails[dept];
+            if (detail) {
+              const x = r.allocByDept[dept] || 0;
+              const y = detail.weight.toFixed(2).replace(/\.?0+$/, '').replace('.', ','); // Use comma as decimal separator
+              const z = detail.count;
+              td.textContent = `${x}/${y}(${z})`;
+            } else {
+              td.textContent = (r.allocByDept[dept] || 0) + '/0(0)';
+            }
+            tr.appendChild(td);
+          });
+          const tdSd = document.createElement('td');
+          tdSd.textContent = r.sd.toFixed(4);
+          tr.appendChild(tdSd);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+      }
+
+      window.onload = init;
+    </script>
 </body>
 
 </html>
