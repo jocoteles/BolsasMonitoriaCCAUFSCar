@@ -1,659 +1,720 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <base target="_top">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Distribuição de Bolsas - CCA/UFSCar</title>
-    <style>
-      :root {
-        --bg: #f4f1ec;
-        --ink: #1f1b16;
-        --muted: #6b5f55;
-        --accent: #0f4c5c;
-        --accent-2: #b66d0d;
-        --card: #fffaf2;
-        --stroke: #d9cbb8;
-        --danger: #8f1d14;
-      }
 
-      * { box-sizing: border-box; }
+<head>
+  <base target="_top">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distribuição de Bolsas - CCA/UFSCar</title>
+  <style>
+    :root {
+      --bg: #f4f1ec;
+      --ink: #1f1b16;
+      --muted: #6b5f55;
+      --accent: #0f4c5c;
+      --accent-2: #b66d0d;
+      --card: #fffaf2;
+      --stroke: #d9cbb8;
+      --danger: #8f1d14;
+    }
 
-      body {
-        margin: 0;
-        font-family: "Spectral", "Georgia", serif;
-        background: radial-gradient(circle at top, #fff8ed, var(--bg));
-        color: var(--ink);
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      header {
-        padding: 24px 32px 12px;
-        border-bottom: 2px solid var(--stroke);
-      }
+    body {
+      margin: 0;
+      font-family: "Spectral", "Georgia", serif;
+      background: radial-gradient(circle at top, #fff8ed, var(--bg));
+      color: var(--ink);
+    }
 
-      header h1 {
-        margin: 0 0 6px;
-        font-size: 28px;
-        letter-spacing: 0.5px;
-      }
+    header {
+      padding: 24px 32px 12px;
+      border-bottom: 2px solid var(--stroke);
+    }
 
-      header p {
-        margin: 0;
-        color: var(--muted);
-      }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
 
-      .container {
-        padding: 20px 32px 40px;
-        display: grid;
-        gap: 16px;
-      }
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
 
-      .panel {
-        background: var(--card);
-        border: 1px solid var(--stroke);
-        border-radius: 16px;
-        padding: 18px;
-        box-shadow: 0 8px 24px rgba(31, 27, 22, 0.08);
-      }
+    .container {
+      padding: 20px 32px 40px;
+      display: grid;
+      gap: 16px;
+    }
 
-      .panel h2 {
-        margin: 0 0 12px;
-        font-size: 18px;
-      }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(31, 27, 22, 0.08);
+    }
 
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
-      }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
 
-      label {
-        font-size: 13px;
-        color: var(--muted);
-        display: block;
-        margin-bottom: 4px;
-      }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
 
-      input, select {
-        padding: 8px 10px;
-        border-radius: 10px;
-        border: 1px solid var(--stroke);
-        background: #fff;
-        font-size: 14px;
-      }
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
 
-      input[disabled] {
-        background: #f0ece6;
-      }
+    input,
+    select {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: #fff;
+      font-size: 14px;
+    }
 
-      .button {
-        padding: 10px 16px;
-        border: none;
-        border-radius: 12px;
-        background: var(--accent);
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        letter-spacing: 0.2px;
-      }
+    input[disabled] {
+      background: #f0ece6;
+    }
 
-      .button.secondary {
-        background: var(--accent-2);
-      }
+    .button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+    }
 
-      .button.ghost {
-        background: transparent;
-        color: var(--accent);
-        border: 1px solid var(--accent);
-      }
+    .button.secondary {
+      background: var(--accent-2);
+    }
 
-      .button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+    .button.ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
 
-      .tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 12px;
-      }
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-      .tab {
-        padding: 8px 12px;
-        border-radius: 999px;
-        border: 1px solid var(--stroke);
-        background: transparent;
-        cursor: pointer;
-        font-weight: 600;
-        color: var(--muted);
-      }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
 
-      .tab.active {
-        background: var(--accent);
-        color: #fff;
-        border-color: var(--accent);
-      }
+    .tab {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+    }
 
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    fieldset {
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+
+    legend {
+      font-weight: 700;
+      padding: 0 10px;
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .auto-save-status {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 8px;
+      min-height: 18px;
+    }
+
+    .discipline-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr 70px 70px 70px 36px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .discipline-row input {
+      width: 100%;
+    }
+
+    .weight-pill {
+      padding: 6px 8px;
+      background: #efe6d7;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .trash {
+      background: transparent;
+      border: none;
+      color: var(--danger);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .trash svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .summary {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .message {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f5e8d0;
+      color: #5a3b12;
+      font-size: 13px;
+    }
+
+    .error {
+      background: #f9d8d6;
+      color: #7b1c14;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--stroke);
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    @media (max-width: 900px) {
       .discipline-row {
-        display: grid;
-        grid-template-columns: 110px 1fr 1fr 70px 70px 70px 36px;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 8px;
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: auto;
       }
 
       .discipline-row input {
-        width: 100%;
-      }
-
-      .weight-pill {
-        padding: 6px 8px;
-        background: #efe6d7;
-        border-radius: 8px;
-        text-align: center;
-        font-size: 12px;
-      }
-
-      .trash {
-        background: transparent;
-        border: none;
-        color: var(--danger);
-        font-size: 14px;
-        cursor: pointer;
-      }
-
-      .trash svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-      }
-
-      .summary {
-        font-size: 13px;
-        color: var(--muted);
-        margin-top: 8px;
-      }
-
-      .message {
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: #f5e8d0;
-        color: #5a3b12;
         font-size: 13px;
       }
+    }
+  </style>
+</head>
 
-      .error {
-        background: #f9d8d6;
-        color: #7b1c14;
-      }
+<body>
+  <header>
+    <h1>Distribuição de Bolsas - CCA/UFSCar</h1>
+    <p>Controle de disciplinas por departamento e geração de classificação.</p>
+  </header>
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-
-      th, td {
-        border: 1px solid var(--stroke);
-        padding: 6px 8px;
-        text-align: center;
-      }
-
-      .footer-text {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 16px;
-      }
-
-      @media (max-width: 900px) {
-        .discipline-row {
-          grid-template-columns: 1fr 1fr;
-          grid-auto-rows: auto;
-        }
-
-        .discipline-row input {
-          font-size: 13px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Distribuição de Bolsas - CCA/UFSCar</h1>
-      <p>Controle de disciplinas por departamento e geração de classificação.</p>
-    </header>
-
-    <div class="container">
-      <div class="panel" id="panel-status">
-        <div class="row" style="justify-content: space-between;">
-          <div>
-            <strong>Usuário:</strong> <span id="user-email">carregando...</span><br />
-            <strong>Departamento:</strong> <span id="user-dept">-</span>
-          </div>
-          <div id="access-badge" class="message">Carregando permissões...</div>
+  <div class="container">
+    <div class="panel" id="panel-status">
+      <div class="row" style="justify-content: space-between;">
+        <div>
+          <strong>Usuário:</strong> <span id="user-email">carregando...</span><br />
+          <strong>Departamento:</strong> <span id="user-dept">-</span>
         </div>
-      </div>
-
-      <div class="panel">
-        <h2>Parâmetros gerais</h2>
-        <div class="row">
-          <div>
-            <label>Semestre</label>
-            <select id="semester-select">
-              <option value="odd">Ímpar</option>
-              <option value="even">Par</option>
-            </select>
-          </div>
-          <div>
-            <label>Bolsas disponíveis</label>
-            <input type="number" id="total-bolsas" min="1" max="30" />
-          </div>
-          <div>
-            <label>Nº melhores distribuições</label>
-            <input type="number" id="n-melhores" min="1" max="10" />
-          </div>
-        </div>
-        <div class="summary" id="semester-hint"></div>
-      </div>
-
-      <div class="panel">
-        <h2>Disciplinas por departamento</h2>
-        <div class="tabs" id="dept-tabs"></div>
-        <div id="dept-content"></div>
-      </div>
-
-      <div class="panel">
-        <h2>Classificação</h2>
-        <div class="row" style="gap: 10px;">
-          <button class="button" id="btn-save">Salvar dados</button>
-          <button class="button secondary" id="btn-generate">Gerar classificação</button>
-          <button class="button ghost" id="btn-pdf" disabled>Gerar PDF</button>
-        </div>
-        <div id="message-box" style="margin-top: 12px;"></div>
-        <div id="results" style="margin-top: 16px;"></div>
-
-        <div class="footer-text">
-          <p>Conforme deliberado em reunião da Comissão de Monitoria do CCA/UFSCar realizada em 24/02/2026 às 14h:</p>
-          <ul>
-            <li>No cálculo das distribuições com menores desvios quadráticos foi atribuído o seguinte peso para cada disciplina: P = 1 + CP/(CT + CP), em que CT e CP são os números de créditos teóricos e de créditos práticos, respectivamente.</li>
-            <li>Havendo menos bolsas do que solicitações, nenhuma das disciplinas aqui solicitadas deve ser optativa.</li>
-            <li>O DRNPA concentra as suas duas bolsas - que todos os departamentos possuem direito por ano - apenas nos semestres ímpares, não fazendo solicitações nos semestres pares.</li>
-          </ul>
-        </div>
+        <div id="access-badge" class="message">Carregando permissões...</div>
       </div>
     </div>
 
-    <script>
-      const state = {
-        userEmail: '',
-        userDept: null,
-        departments: [],
-        settings: { semester: 'odd', totalBolsas: 12, nMelhores: 10 },
-        disciplinesByDept: {},
-        activeDept: null,
-        lastClassification: null
+    <div class="panel">
+      <h2>Parâmetros gerais</h2>
+      <div class="row">
+        <div>
+          <label>Semestre</label>
+          <select id="semester-select">
+            <option value="odd">Ímpar</option>
+            <option value="even">Par</option>
+          </select>
+        </div>
+        <div>
+          <label>Bolsas disponíveis</label>
+          <input type="number" id="total-bolsas" min="1" max="30" />
+        </div>
+        <div>
+          <label>Nº melhores distribuições</label>
+          <input type="number" id="n-melhores" min="1" max="10" />
+        </div>
+      </div>
+      <div class="summary" id="semester-hint"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Disciplinas por departamento</h2>
+      <div id="auto-save-info" class="auto-save-status"></div>
+      <div id="dept-content"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Classificação</h2>
+      <div class="row" style="gap: 10px;">
+        <button class="button secondary" id="btn-generate">Gerar classificação</button>
+        <button class="button ghost" id="btn-pdf" disabled>Gerar PDF</button>
+      </div>
+      <div id="message-box" style="margin-top: 12px;"></div>
+      <div id="results" style="margin-top: 16px;"></div>
+
+      <div class="footer-text">
+        <p>Conforme deliberado em reunião da Comissão de Monitoria do CCA/UFSCar realizada em 24/02/2026 às 14h:</p>
+        <ul>
+          <li>No cálculo das distribuições com menores desvios quadráticos foi atribuído o seguinte peso para cada
+            disciplina: P = 1 + CP/(CT + CP), em que CT e CP são os números de créditos teóricos e de créditos práticos,
+            respectivamente.</li>
+          <li>Havendo menos bolsas do que solicitações, nenhuma das disciplinas aqui solicitadas deve ser optativa.</li>
+          <li>O DRNPA concentra as suas duas bolsas - que todos os departamentos possuem direito por ano - apenas nos
+            semestres ímpares, não fazendo solicitações nos semestres pares.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      userEmail: '',
+      userDept: null,
+      departments: [],
+      settings: { semester: 'odd', totalBolsas: 12, nMelhores: 10 },
+      disciplinesByDept: {},
+      activeDept: null,
+      lastClassification: null
+    };
+
+    function init() {
+      google.script.run.withSuccessHandler(function (data) {
+        state.userEmail = data.userEmail || '';
+        state.userDept = data.userDept || null;
+        state.departments = (data.departments || []).sort();
+        state.disciplinesByDept = data.disciplinesByDept || {};
+
+        document.getElementById('user-dept').textContent = state.userDept || 'Somente leitura';
+        updateAccessBadge();
+        bindSettings();
+        renderDepartments();
+      }).withFailureHandler(showError).getAppData();
+    }
+
+    function updateAccessBadge() {
+      const badge = document.getElementById('access-badge');
+      if (state.userDept) {
+        badge.textContent = 'Edição liberada para ' + state.userDept;
+      } else {
+        badge.textContent = 'Acesso somente leitura';
+      }
+    }
+
+    function bindSettings() {
+      const semesterSelect = document.getElementById('semester-select');
+      const totalBolsas = document.getElementById('total-bolsas');
+      const nMelhores = document.getElementById('n-melhores');
+
+      semesterSelect.value = state.settings.semester || 'odd';
+      totalBolsas.value = state.settings.totalBolsas || 12;
+      nMelhores.value = state.settings.nMelhores || 10;
+
+      semesterSelect.onchange = function () {
+        state.settings.semester = semesterSelect.value;
+        renderDepartments();
+        updateSemesterHint();
+        triggerAutoSave();
       };
 
-      function init() {
-        google.script.run.withSuccessHandler(function(data) {
-          state.userEmail = data.userEmail || '';
-          state.userDept = data.userDept || null;
-          state.departments = data.departments || [];
-          state.disciplinesByDept = data.disciplinesByDept || {};
-          state.activeDept = state.departments[0] || null;
+      totalBolsas.oninput = function () {
+        state.settings.totalBolsas = Number(totalBolsas.value || 0);
+        triggerAutoSave();
+      };
 
-          document.getElementById('user-email').textContent = state.userEmail || 'indefinido';
-          document.getElementById('user-dept').textContent = state.userDept || 'Somente leitura';
-          updateAccessBadge();
-          bindSettings();
-          renderTabs();
-          renderDepartment();
-        }).withFailureHandler(showError).getAppData();
+      nMelhores.oninput = function () {
+        state.settings.nMelhores = Number(nMelhores.value || 0);
+        triggerAutoSave();
+      };
+
+      updateSemesterHint();
+    }
+
+    function updateSemesterHint() {
+      const hint = document.getElementById('semester-hint');
+      if (state.settings.semester === 'even') {
+        hint.textContent = 'Semestre par: DRNPA não participa das solicitações.';
+      } else {
+        hint.textContent = 'Semestre ímpar: DRNPA deve receber no mínimo 2 bolsas, se houver solicitações.';
+      }
+    }
+
+    function renderDepartments() {
+      const content = document.getElementById('dept-content');
+      content.innerHTML = '';
+
+      const visibleDepts = getVisibleDepartments();
+      if (!visibleDepts.length) {
+        content.innerHTML = '<div class="message">Nenhum departamento ativo.</div>';
+        return;
       }
 
-      function updateAccessBadge() {
-        const badge = document.getElementById('access-badge');
-        if (state.userDept) {
-          badge.textContent = 'Edição liberada para ' + state.userDept;
-        } else {
-          badge.textContent = 'Acesso somente leitura';
-        }
-      }
+      visibleDepts.forEach(dept => {
+        const fieldset = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        legend.textContent = dept;
+        fieldset.appendChild(legend);
 
-      function bindSettings() {
-        const semesterSelect = document.getElementById('semester-select');
-        const totalBolsas = document.getElementById('total-bolsas');
-        const nMelhores = document.getElementById('n-melhores');
+        renderDepartmentInFieldset(dept, fieldset);
+        content.appendChild(fieldset);
+      });
+    }
 
-        semesterSelect.value = state.settings.semester || 'odd';
-        totalBolsas.value = state.settings.totalBolsas || 12;
-        nMelhores.value = state.settings.nMelhores || 10;
+    function getVisibleDepartments() {
+      const depts = state.settings.semester === 'even'
+        ? state.departments.filter(d => d !== 'DRNPA')
+        : state.departments.slice();
+      return depts;
+    }
 
-        semesterSelect.onchange = function() {
-          state.settings.semester = semesterSelect.value;
-          renderTabs();
-          renderDepartment();
-          updateSemesterHint();
+    function renderDepartmentInFieldset(dept, container) {
+      const canEdit = state.userDept === dept;
+      const list = state.disciplinesByDept[dept] || [];
+
+      const headerRow = document.createElement('div');
+      headerRow.className = 'row';
+      headerRow.style.justifyContent = 'space-between';
+      headerRow.style.marginBottom = '12px';
+
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.style.marginTop = '0';
+      summary.textContent = 'Solicitação ponderada: ' + totalWeight(list).toFixed(2);
+      headerRow.appendChild(summary);
+
+      if (canEdit) {
+        const addButton = document.createElement('button');
+        addButton.className = 'button ghost';
+        addButton.textContent = 'Adicionar disciplina';
+        addButton.onclick = function () {
+          list.push({ codigo: '', disciplina: '', professor: '', ct: 0, cp: 0 });
+          renderDepartments();
+          triggerAutoSave();
         };
+        headerRow.appendChild(addButton);
+      }
+      container.appendChild(headerRow);
 
-        totalBolsas.oninput = function() {
-          state.settings.totalBolsas = Number(totalBolsas.value || 0);
+      if (!list.length) {
+        const empty = document.createElement('div');
+        empty.className = 'message';
+        empty.textContent = 'Nenhuma disciplina cadastrada.';
+        container.appendChild(empty);
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'discipline-row';
+
+        const code = makeInput('codigo', item.codigo, canEdit, '000000');
+        const disc = makeInput('disciplina', item.disciplina, canEdit, 'Nome da disciplina');
+        const prof = makeInput('professor', item.professor, canEdit, 'Professor');
+        const ct = makeNumber('ct', item.ct, canEdit);
+        const cp = makeNumber('cp', item.cp, canEdit);
+
+        code.oninput = () => { item.codigo = code.value; triggerAutoSave(); };
+        disc.oninput = () => { item.disciplina = disc.value; triggerAutoSave(); };
+        prof.oninput = () => { item.professor = prof.value; triggerAutoSave(); };
+        ct.oninput = () => { item.ct = Number(ct.value || 0); updateWeights(dept); triggerAutoSave(); };
+        cp.oninput = () => { item.cp = Number(cp.value || 0); updateWeights(dept); triggerAutoSave(); };
+
+        const weight = document.createElement('div');
+        weight.id = `weight-${dept}-${idx}`;
+        weight.className = 'weight-pill';
+        weight.textContent = weightOf(item).toFixed(2);
+
+        row.appendChild(wrapField('Código', code));
+        row.appendChild(wrapField('Disciplina', disc));
+        row.appendChild(wrapField('Professor', prof));
+        row.appendChild(wrapField('CT', ct));
+        row.appendChild(wrapField('CP', cp));
+        row.appendChild(weight);
+
+        const trash = document.createElement('button');
+        trash.className = 'trash';
+        trash.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
+        trash.disabled = !canEdit;
+        trash.onclick = () => {
+          list.splice(idx, 1);
+          renderDepartments();
+          triggerAutoSave();
         };
+        row.appendChild(trash);
 
-        nMelhores.oninput = function() {
-          state.settings.nMelhores = Number(nMelhores.value || 0);
-        };
+        container.appendChild(row);
+      });
 
-        updateSemesterHint();
+      const validation = validateDepartment(list);
+      if (!validation.ok) {
+        const warn = document.createElement('div');
+        warn.className = 'message error';
+        warn.textContent = validation.error;
+        container.appendChild(warn);
       }
+    }
 
-      function updateSemesterHint() {
-        const hint = document.getElementById('semester-hint');
-        if (state.settings.semester === 'even') {
-          hint.textContent = 'Semestre par: DRNPA não participa das solicitações.';
-        } else {
-          hint.textContent = 'Semestre ímpar: DRNPA deve receber no mínimo 2 bolsas, se houver solicitações.';
+    function updateWeights(dept) {
+      const list = state.disciplinesByDept[dept] || [];
+      list.forEach((item, idx) => {
+        const el = document.getElementById(`weight-${dept}-${idx}`);
+        if (el) el.textContent = weightOf(item).toFixed(2);
+      });
+      // We don't re-render everything to avoid losing focus, but we might need to update total weight
+      renderDepartments(); // Re-rendering for now to keep it simple, but we should handle focus.
+    }
+
+    function makeInput(name, value, enabled, placeholder) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = value || '';
+      input.placeholder = placeholder || '';
+      input.disabled = !enabled;
+      return input;
+    }
+
+    function makeNumber(name, value, enabled) {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 0;
+      input.max = 6;
+      input.value = value || 0;
+      input.disabled = !enabled;
+      return input;
+    }
+
+    function wrapField(label, field) {
+      const wrapper = document.createElement('div');
+      const lab = document.createElement('label');
+      lab.textContent = label;
+      wrapper.appendChild(lab);
+      wrapper.appendChild(field);
+      return wrapper;
+    }
+
+    function totalWeight(list) {
+      return list.reduce((acc, d) => acc + weightOf(d), 0);
+    }
+
+    function weightOf(item) {
+      const ct = Number(item.ct || 0);
+      const cp = Number(item.cp || 0);
+      if (ct + cp <= 0) return 0;
+      return 1 + cp / (ct + cp);
+    }
+
+    function validateDepartment(list) {
+      for (let i = 0; i < list.length; i++) {
+        const d = list[i];
+        if (isEmptyDiscipline(d)) {
+          continue;
         }
-      }
-
-      function renderTabs() {
-        const tabs = document.getElementById('dept-tabs');
-        tabs.innerHTML = '';
-
-        const departments = getVisibleDepartments();
-        if (!departments.length) {
-          tabs.innerHTML = '<div class="message">Nenhum departamento ativo.</div>';
-          return;
+        if (!/^\d{6}$/.test(String(d.codigo || ''))) {
+          return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
         }
-
-        if (!departments.includes(state.activeDept)) {
-          state.activeDept = departments[0];
-        }
-
-        departments.forEach(dept => {
-          const button = document.createElement('button');
-          button.className = 'tab' + (dept === state.activeDept ? ' active' : '');
-          button.textContent = dept;
-          button.onclick = function() {
-            state.activeDept = dept;
-            renderTabs();
-            renderDepartment();
-          };
-          tabs.appendChild(button);
-        });
-      }
-
-      function getVisibleDepartments() {
-        if (state.settings.semester === 'even') {
-          return state.departments.filter(d => d !== 'DRNPA');
-        }
-        return state.departments.slice();
-      }
-
-      function renderDepartment() {
-        const content = document.getElementById('dept-content');
-        content.innerHTML = '';
-        const dept = state.activeDept;
-        if (!dept) return;
-
-        const canEdit = state.userDept === dept;
-        const list = state.disciplinesByDept[dept] || [];
-
-        const summary = document.createElement('div');
-        summary.className = 'summary';
-        summary.textContent = 'Solicitação ponderada: ' + totalWeight(list).toFixed(2);
-        content.appendChild(summary);
-
-        if (canEdit) {
-          const addButton = document.createElement('button');
-          addButton.className = 'button ghost';
-          addButton.textContent = 'Adicionar disciplina';
-          addButton.onclick = function() {
-            list.push({ codigo: '', disciplina: '', professor: '', ct: 0, cp: 0 });
-            renderDepartment();
-          };
-          content.appendChild(addButton);
-        }
-
-        if (!list.length) {
-          const empty = document.createElement('div');
-          empty.className = 'message';
-          empty.textContent = 'Nenhuma disciplina cadastrada.';
-          content.appendChild(empty);
-        }
-
-        list.forEach((item, idx) => {
-          const row = document.createElement('div');
-          row.className = 'discipline-row';
-
-          const code = makeInput('codigo', item.codigo, canEdit, '000000');
-          const disc = makeInput('disciplina', item.disciplina, canEdit, 'Nome da disciplina');
-          const prof = makeInput('professor', item.professor, canEdit, 'Professor');
-          const ct = makeNumber('ct', item.ct, canEdit);
-          const cp = makeNumber('cp', item.cp, canEdit);
-
-          code.oninput = () => { item.codigo = code.value; };
-          disc.oninput = () => { item.disciplina = disc.value; };
-          prof.oninput = () => { item.professor = prof.value; };
-          ct.oninput = () => { item.ct = Number(ct.value || 0); renderDepartment(); };
-          cp.oninput = () => { item.cp = Number(cp.value || 0); renderDepartment(); };
-
-          const weight = document.createElement('div');
-          weight.className = 'weight-pill';
-          weight.textContent = weightOf(item).toFixed(2);
-
-          row.appendChild(wrapField('Código', code));
-          row.appendChild(wrapField('Disciplina', disc));
-          row.appendChild(wrapField('Professor', prof));
-          row.appendChild(wrapField('CT', ct));
-          row.appendChild(wrapField('CP', cp));
-          row.appendChild(weight);
-
-          const trash = document.createElement('button');
-          trash.className = 'trash';
-          trash.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
-          trash.disabled = !canEdit;
-          trash.onclick = () => {
-            list.splice(idx, 1);
-            renderDepartment();
-          };
-          row.appendChild(trash);
-
-          content.appendChild(row);
-        });
-
-        const validation = validateDepartment(list);
-        if (!validation.ok) {
-          const warn = document.createElement('div');
-          warn.className = 'message error';
-          warn.textContent = validation.error;
-          content.appendChild(warn);
-        }
-      }
-
-      function makeInput(name, value, enabled, placeholder) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = value || '';
-        input.placeholder = placeholder || '';
-        input.disabled = !enabled;
-        return input;
-      }
-
-      function makeNumber(name, value, enabled) {
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = 0;
-        input.max = 6;
-        input.value = value || 0;
-        input.disabled = !enabled;
-        return input;
-      }
-
-      function wrapField(label, field) {
-        const wrapper = document.createElement('div');
-        const lab = document.createElement('label');
-        lab.textContent = label;
-        wrapper.appendChild(lab);
-        wrapper.appendChild(field);
-        return wrapper;
-      }
-
-      function totalWeight(list) {
-        return list.reduce((acc, d) => acc + weightOf(d), 0);
-      }
-
-      function weightOf(item) {
-        const ct = Number(item.ct || 0);
-        const cp = Number(item.cp || 0);
-        if (ct + cp <= 0) return 0;
-        return 1 + cp / (ct + cp);
-      }
-
-      function validateDepartment(list) {
-        for (let i = 0; i < list.length; i++) {
-          const d = list[i];
-          if (isEmptyDiscipline(d)) {
-            continue;
-          }
-          if (!/^\d{6}$/.test(String(d.codigo || ''))) {
-            return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
-          }
-          const ct = Number(d.ct || 0);
-          const cp = Number(d.cp || 0);
-          if (ct < 0 || ct > 6 || cp < 0 || cp > 6) {
-            return { ok: false, error: 'CT/CP devem estar entre 0 e 6 na disciplina #' + (i + 1) + '.' };
-          }
-          if (ct + cp < 1 || ct + cp > 6) {
-            return { ok: false, error: 'CT + CP deve estar entre 1 e 6 na disciplina #' + (i + 1) + '.' };
-          }
-        }
-        return { ok: true };
-      }
-
-      function isEmptyDiscipline(d) {
-        const code = String(d.codigo || '').trim();
-        const name = String(d.disciplina || '').trim();
-        const prof = String(d.professor || '').trim();
         const ct = Number(d.ct || 0);
         const cp = Number(d.cp || 0);
-        return !code && !name && !prof && ct === 0 && cp === 0;
-      }
-
-      function collectPayload() {
-        return {
-          settings: state.settings,
-          disciplines: state.userDept
-            ? (state.disciplinesByDept[state.userDept] || []).filter(d => !isEmptyDiscipline(d))
-            : []
-        };
-      }
-
-      function showMessage(html, isError) {
-        const box = document.getElementById('message-box');
-        box.innerHTML = '';
-        if (!html) return;
-        const div = document.createElement('div');
-        div.className = 'message' + (isError ? ' error' : '');
-        div.innerHTML = html;
-        box.appendChild(div);
-      }
-
-      function showError(error) {
-        const message = (error && error.message) ? error.message : String(error || 'Erro desconhecido');
-        showMessage(message, true);
-      }
-
-      document.getElementById('btn-save').onclick = function() {
-        if (!state.userDept) {
-          showMessage('Apenas representantes podem salvar dados.', true);
-          return;
+        if (ct < 0 || ct > 6 || cp < 0 || cp > 6) {
+          return { ok: false, error: 'CT/CP devem estar entre 0 e 6 na disciplina #' + (i + 1) + '.' };
         }
-        const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
-        if (!validation.ok) {
-          showMessage(validation.error, true);
-          return;
+        if (ct + cp < 1 || ct + cp > 6) {
+          return { ok: false, error: 'CT + CP deve estar entre 1 e 6 na disciplina #' + (i + 1) + '.' };
         }
-        google.script.run.withSuccessHandler(function() {
-          showMessage('Dados salvos com sucesso.');
-        }).withFailureHandler(showError).saveAppData(collectPayload());
+      }
+      return { ok: true };
+    }
+
+    function isEmptyDiscipline(d) {
+      const code = String(d.codigo || '').trim();
+      const name = String(d.disciplina || '').trim();
+      const prof = String(d.professor || '').trim();
+      const ct = Number(d.ct || 0);
+      const cp = Number(d.cp || 0);
+      return !code && !name && !prof && ct === 0 && cp === 0;
+    }
+
+    function collectPayload() {
+      return {
+        settings: state.settings,
+        disciplines: state.userDept
+          ? (state.disciplinesByDept[state.userDept] || []).filter(d => !isEmptyDiscipline(d))
+          : []
       };
+    }
 
-      document.getElementById('btn-generate').onclick = function() {
-        if (!state.userDept) {
-          showMessage('Apenas representantes podem gerar classificação.', true);
-          return;
-        }
-        const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
-        if (!validation.ok) {
-          showMessage(validation.error, true);
-          return;
-        }
-        google.script.run.withSuccessHandler(function() {
-          google.script.run.withSuccessHandler(function(result) {
-            state.lastClassification = result;
-            renderResults();
-            showMessage(result.ok ? 'Classificação gerada.' : result.error, !result.ok);
-            document.getElementById('btn-pdf').disabled = !result.ok;
-          }).withFailureHandler(showError).generateClassification({ settings: state.settings });
-        }).withFailureHandler(showError).saveAppData(collectPayload());
-      };
+    function showMessage(html, isError) {
+      const box = document.getElementById('message-box');
+      box.innerHTML = '';
+      if (!html) return;
+      const div = document.createElement('div');
+      div.className = 'message' + (isError ? ' error' : '');
+      div.innerHTML = html;
+      box.appendChild(div);
+    }
 
-      document.getElementById('btn-pdf').onclick = function() {
-        if (!state.lastClassification) {
-          showMessage('Gere a classificação antes de exportar o PDF.', true);
-          return;
-        }
-        google.script.run.withSuccessHandler(function(fileInfo) {
-          showMessage('PDF gerado: ' + fileInfo.name + ' (link disponível no Drive).');
-        }).withFailureHandler(showError).generatePdf(state.lastClassification);
-      };
+    function showError(error) {
+      const message = (error && error.message) ? error.message : String(error || 'Erro desconhecido');
+      showMessage(message, true);
+    }
 
-      function renderResults() {
-        const container = document.getElementById('results');
-        container.innerHTML = '';
-        const result = state.lastClassification;
-        if (!result || !result.results) return;
+    let saveTimeout = null;
+    function triggerAutoSave() {
+      if (!state.userDept) return;
 
-        if (!result.ok) {
-          container.innerHTML = '<div class="message error">' + result.error + '</div>';
-          return;
-        }
+      const info = document.getElementById('auto-save-info');
+      info.textContent = 'Alterações pendentes...';
 
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(performSave, 1500);
+    }
+
+    function performSave() {
+      const info = document.getElementById('auto-save-info');
+      const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
+
+      if (!validation.ok) {
+        info.innerHTML = '<span style="color:var(--danger)">Erro: ' + validation.error + ' (Não salvo)</span>';
+        return;
+      }
+
+      info.textContent = 'Salvando...';
+      google.script.run.withSuccessHandler(function () {
+        const now = new Date().toLocaleTimeString();
+        info.textContent = 'Dados salvos automaticamente às ' + now;
+      }).withFailureHandler(function (err) {
+        info.innerHTML = '<span style="color:var(--danger)">Erro ao salvar: ' + (err.message || err) + '</span>';
+      }).saveAppData(collectPayload());
+    }
+
+    document.getElementById('btn-generate').onclick = function () {
+      if (!state.userDept) {
+        showMessage('Apenas representantes podem gerar classificação.', true);
+        return;
+      }
+      const validation = validateDepartment(state.disciplinesByDept[state.userDept] || []);
+      if (!validation.ok) {
+        showMessage(validation.error, true);
+        return;
+      }
+
+      const info = document.getElementById('auto-save-info');
+      info.textContent = 'Salvando antes de gerar...';
+
+      google.script.run.withSuccessHandler(function () {
+        info.textContent = 'Dados salvos. Gerando classificação...';
+        google.script.run.withSuccessHandler(function (result) {
+          state.lastClassification = result;
+          renderResults();
+          showMessage(result.ok ? 'Classificação gerada.' : result.error, !result.ok);
+          document.getElementById('btn-pdf').disabled = !result.ok;
+          info.textContent = 'Classificação gerada com sucesso.';
+        }).withFailureHandler(showError).generateClassification({ settings: state.settings });
+      }).withFailureHandler(showError).saveAppData(collectPayload());
+    };
+
+    document.getElementById('btn-pdf').onclick = function () {
+      if (!state.lastClassification) {
+        showMessage('Gere a classificação antes de exportar o PDF.', true);
+        return;
+      }
+      google.script.run.withSuccessHandler(function (fileInfo) {
+        showMessage('PDF gerado: ' + fileInfo.name + ' (link disponível no Drive).');
+      }).withFailureHandler(showError).generatePdf(state.lastClassification);
+    };
+
+    function renderResults() {
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+      const result = state.lastClassification;
+      if (!result || !result.results) return;
+
+      if (!result.ok) {
+        container.innerHTML = '<div class="message error">' + result.error + '</div>';
+        return;
+      }
+
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      result.departments.forEach(dept => {
+        const th = document.createElement('th');
+        th.textContent = dept;
+        headerRow.appendChild(th);
+      });
+      const thSd = document.createElement('th');
+      thSd.textContent = 'Desvio';
+      headerRow.appendChild(thSd);
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      result.results.forEach(r => {
+        const tr = document.createElement('tr');
         result.departments.forEach(dept => {
-          const th = document.createElement('th');
-          th.textContent = dept;
-          headerRow.appendChild(th);
+          const td = document.createElement('td');
+          td.textContent = r.allocByDept[dept] || 0;
+          tr.appendChild(td);
         });
-        const thSd = document.createElement('th');
-        thSd.textContent = 'Desvio';
-        headerRow.appendChild(thSd);
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
+        const tdSd = document.createElement('td');
+        tdSd.textContent = r.sd.toFixed(4);
+        tr.appendChild(tdSd);
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
 
-        const tbody = document.createElement('tbody');
-        result.results.forEach(r => {
-          const tr = document.createElement('tr');
-          result.departments.forEach(dept => {
-            const td = document.createElement('td');
-            td.textContent = r.allocByDept[dept] || 0;
-            tr.appendChild(td);
-          });
-          const tdSd = document.createElement('td');
-          tdSd.textContent = r.sd.toFixed(4);
-          tr.appendChild(tdSd);
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-        container.appendChild(table);
-      }
+    window.onload = init;
+  </script>
+</body>
 
-      window.onload = init;
-    </script>
-  </body>
 </html>

@@ -1,0 +1,3 @@
+No card de Disciplinas por departamento, todos os departamentos devem ficar visíveis sem botão de seleção. Coloque um seguido do outro verticalmente, separados por um fieldset por departamento. Distribua-os em ordem alfabética.
+
+Implemente salvamento automático dos dados sem precisar do botão "Salvar Dados" que deve ser retirado da interface. Mas coloque uma mensagem clara de que os dados atuais foram salvos ou não. Pode fazer essa checagem quando houver edição de campo.

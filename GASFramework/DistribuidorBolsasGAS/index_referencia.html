@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Otimizador de Distribuição de Bolsas de Monitoria do CCA/UFSCar</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --panel: #ffffff;
+      --ink: #1e1e1e;
+      --muted: #606060;
+      --accent: #0c6d79;
+      --accent-2: #d97706;
+      --grid: #e6e2d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 10%, #fff7e8 0%, #f6f4ef 45%, #efeae2 100%);
+      color: var(--ink);
+      font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+      line-height: 1.45;
+      padding: 24px;
+    }
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .sub {
+      color: var(--muted);
+      margin: 0 0 24px 0;
+    }
+    .layout {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    @media (min-width: 1100px) {
+      .layout { grid-template-columns: 380px minmax(0, 1fr); }
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      min-width: 0;
+    }
+    .controls label {
+      display: block;
+      font-weight: 600;
+      margin: 12px 0 6px;
+    }
+    .controls input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cfc7b5;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .controls .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .controls .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .controls .field-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .controls .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    #extraSemVal {
+      min-width: 24px;
+      text-align: right;
+      font-weight: 600;
+    }
+    button {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #0a5d66; }
+    .charts {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .chart-box {
+      height: 450px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .chart-box h3 { margin: 0; }
+    .chart-box canvas { flex: 1; }
+    canvas { width: 100% !important; height: 80% !important; }
+    .output {
+      white-space: pre;
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+      font-size: 13px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 520px;
+    }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .warn { color: #b45309; font-weight: 600; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Otimizador de Distribuição de Bolsas de Monitoria do CCA/UFSCar</h1>
+  <p class="sub">Método: minimização do desvio padrão das razões acumuladas.</p>
+
+  <div class="layout">
+    <div class="panel controls">
+      <label for="extraSem">Semestres adicionais (a partir do último histórico)</label>
+      <div class="inline">
+        <input id="extraSem" type="range" min="0" max="20" step="1" value="0" />
+        <span id="extraSemVal">0</span>
+      </div>
+
+      <label>Quantidade de bolsas disponíveis (sorteio)</label>
+      <div class="row">
+        <div class="field">
+          <span class="field-label">Mínimo (5–12)</span>
+          <input id="bolsasMin" type="number" min="5" max="12" step="1" value="12" />
+        </div>
+        <div class="field">
+          <span class="field-label">Máximo (5–30)</span>
+          <input id="bolsasMax" type="number" min="5" max="30" step="1" value="12" />
+        </div>
+      </div>
+      <div class="hint">Valores sorteados a cada semestre simulado.</div>
+
+      <label>Regra de solicitação do DRNPA</label>
+      <div class="inline">
+        <input id="drnpaRandom" type="radio" name="drnpaMode" value="random" checked />
+        <label for="drnpaRandom">DRNPA [X/Y]</label>
+      </div>
+      <div class="hint">Sorteia pedido entre o mínimo e o máximo do histórico do DRNPA. Atendimento otimizado normalmente, como os outros departamentos.</div>
+      <div class="inline">
+        <input id="drnpa12" type="radio" name="drnpaMode" value="12|0" />
+        <label for="drnpa12">DRNPA [X/(1 ou 2)|0]</label>
+      </div>
+      <div class="hint">Semestres ímpares: pedido sorteia 1 ou 2. Semestres pares, pedido 0.</div>
+      <div class="inline">
+        <input id="drnpaX2" type="radio" name="drnpaMode" value="x2|0" />
+        <label for="drnpaX2">DRNPA [X/2|0]</label>
+      </div>
+      <div class="hint">Semestres ímpares: pedido fixo 2 e atendimento otimizado. Semestres pares, pedido 0.</div>
+      <div class="inline">
+        <input id="drnpa2" type="radio" name="drnpaMode" value="2|0" />
+        <label for="drnpa2">DRNPA [2/2|0]</label>
+      </div>
+      <div class="hint">Semestres ímpares: pedido e atendimento fixos em 2. Semestres pares, pedido 0.</div>
+
+      <label>Critério de simulação</label>
+      <div class="inline">
+        <input id="simSem" type="radio" name="simMode" value="sem" checked />
+        <label for="simSem">Otimização com StD (semestres isolados)</label>
+      </div>
+      <div class="inline">
+        <input id="simAcum" type="radio" name="simMode" value="acum" />
+        <label for="simAcum">Otimização com StDA (acumulado até o semestre)</label>
+      </div>
+
+      <button id="runBtn">Gerar nova simulação</button>
+      <div id="warning" class="warn"></div>
+    </div>
+
+    <div class="charts">
+      <div class="panel chart-box">
+        <h3>Razão por semestre (X/Y)</h3>
+        X: atendido no semestre<br>
+        Y: solicitado no semestre
+        <canvas id="chartSem"></canvas>
+      </div>
+      <div class="panel chart-box">
+        <h3>Razão acumulada (X/Y)</h3>
+        X: atendido acumulado até o semestre<br>
+        Y: solicitado acumulado até o semestre
+        <canvas id="chartCum"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Tabela de resultados</h3>
+        <div id="output" class="output">Carregando histórico...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/fmin@0.0.2/build/fmin.min.js"></script>
+  <script>
+
+    const HIST_FILE = 'historico_distribuicoes.txt';
+    let chartSem = null;
+    let chartCum = null;
+    let currentSeed = Math.floor(Math.random() * 1e9);
+
+    function createRng(seed) {
+      // LCG (deterministico e simples para reproducao)
+      let state = seed >>> 0;
+      return function () {
+        state = (1664525 * state + 1013904223) >>> 0;
+        return state / 0x100000000;
+      };
+    }
+
+    function parseHistory(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trimEnd());
+      const semesters = [];
+      let headerLine = null;
+      let deptNames = [];
+
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line) continue;
+        if (!headerLine && !/^\d{4}\/[12]:/.test(line)) {
+          headerLine = line;
+          const headers = headerLine.split(/\s{2,}/).filter(Boolean);
+          deptNames = headers.slice(0, headers.length - 1);
+          continue;
+        }
+
+        const mLine = line.match(/^(\d{4}\/[12]):\s*(.*)$/);
+        if (!mLine) continue;
+        const term = mLine[1];
+        const values = mLine[2];
+        const parts = values.split(/\s{2,}/).filter(Boolean);
+        const alloc = [];
+        const req = [];
+        const ratioTxt = [];
+        for (let d = 0; d < deptNames.length; d++) {
+          const part = parts[d] || '';
+          const m = part.match(/\((\d+)\/(\d+)\)/);
+          const x = m ? parseInt(m[1], 10) : 0;
+          const y = m ? parseInt(m[2], 10) : 0;
+          alloc.push(x);
+          req.push(y);
+          ratioTxt.push(`${x}/${y}`);
+        }
+        semesters.push({ term, deptNames, alloc, req, ratioTxt });
+      }
+      return semesters;
+    }
+
+    function nextTerm(term) {
+      const m = term.match(/^(\d{4})\/(1|2)$/);
+      if (!m) return term;
+      let year = parseInt(m[1], 10);
+      let sem = parseInt(m[2], 10);
+      if (sem === 1) sem = 2; else { sem = 1; year += 1; }
+      return `${year}/${sem}`;
+    }
+
+    function stdev(values) {
+      if (values.length <= 1) return 0;
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / (values.length - 1);
+      return Math.sqrt(variance);
+    }
+
+    function buildMinMaxRequests(history, deptNames) {
+      const minReq = Array(deptNames.length).fill(Infinity);
+      const maxReq = Array(deptNames.length).fill(-Infinity);
+      history.forEach(sem => {
+        sem.req.forEach((y, idx) => {
+          minReq[idx] = Math.min(minReq[idx], y);
+          maxReq[idx] = Math.max(maxReq[idx], y);
+        });
+      });
+      for (let i = 0; i < deptNames.length; i++) {
+        if (!Number.isFinite(minReq[i])) minReq[i] = 0;
+        if (!Number.isFinite(maxReq[i])) maxReq[i] = 0;
+      }
+      return { minReq, maxReq };
+    }
+
+    function generateRequests(deptNames, minReq, maxReq, term, drnpaMode, rng) {
+      const requests = [];
+      const isOdd = term.endsWith('/1');
+      for (let i = 0; i < deptNames.length; i++) {
+        const name = deptNames[i];
+        let y = randomInt(minReq[i], maxReq[i], rng);
+        if (name === 'DRNPA') {
+          if (drnpaMode === '12|0') {
+            y = isOdd ? randomInt(1, 2, rng) : 0;
+          } else if (drnpaMode === 'x2|0' || drnpaMode === '2|0') {
+            y = isOdd ? 2 : 0;
+          }
+        }
+        requests.push(y);
+      }
+      return requests;
+    }
+
+    function randomInt(min, max, rng) {
+      if (max < min) [min, max] = [max, min];
+      const r = rng ? rng() : Math.random();
+      return Math.floor(r * (max - min + 1)) + min;
+    }
+
+    function minimizeAllocation({
+      requests,
+      totalAvailable,
+      cumAlloc,
+      cumReq,
+      deptNames,
+      term,
+      simMode,
+      optSeed,
+      fixedAlloc
+    }) {
+      const localRequests = requests.slice();
+      const n = requests.length;
+      const MULTI_STARTS = 16;
+      const EXACT_LIMIT = 20;
+      const minAlloc = localRequests.map((y, idx) => {
+        if (y <= 0) return 0;
+        let min = 1;
+        return min;
+      });
+      const maxAlloc = localRequests.map(y => (y > 0 ? y : 0));
+
+      if (fixedAlloc && fixedAlloc.length === n) {
+        for (let i = 0; i < n; i++) {
+          if (fixedAlloc[i] == null) continue;
+          const fixed = fixedAlloc[i];
+          localRequests[i] = fixed;
+          minAlloc[i] = fixed;
+          maxAlloc[i] = fixed;
+        }
+      }
+
+      let minSum = minAlloc.reduce((a, b) => a + b, 0);
+      let maxSum = maxAlloc.reduce((a, b) => a + b, 0);
+
+      let adjustedTotal = totalAvailable;
+      let warning = '';
+      if (adjustedTotal < minSum) {
+        warning = `Total ajustado de ${totalAvailable} para ${minSum} (restrições mínimas).`;
+        adjustedTotal = minSum;
+      }
+      if (adjustedTotal > maxSum) {
+        warning = `Total ajustado de ${totalAvailable} para ${maxSum} (limite das solicitações).`;
+        adjustedTotal = maxSum;
+      }
+
+      const scoreSem = (alloc) => {
+        const ratiosSem = [];
+        for (let i = 0; i < n; i++) {
+          if (localRequests[i] > 0) ratiosSem.push(alloc[i] / localRequests[i]);
+        }
+        return stdev(ratiosSem);
+      };
+      const scoreAcum = (alloc) => {
+        const ratios = [];
+        for (let i = 0; i < n; i++) {
+          const denom = cumReq[i] + localRequests[i];
+          if (denom > 0) ratios.push((cumAlloc[i] + alloc[i]) / denom);
+        }
+        return stdev(ratios);
+      };
+      const scoreFn = simMode === 'sem' ? scoreSem : scoreAcum;
+
+      const objective = (allocReal) => {
+        const alloc = allocReal.map((v, i) => Math.min(Math.max(v, minAlloc[i]), maxAlloc[i]));
+        const sum = alloc.reduce((a, b) => a + b, 0);
+        let penalty = Math.abs(sum - adjustedTotal) * 10;
+        for (let i = 0; i < n; i++) {
+          if (allocReal[i] < minAlloc[i]) penalty += (minAlloc[i] - allocReal[i]) ** 2 * 10;
+          if (allocReal[i] > maxAlloc[i]) penalty += (allocReal[i] - maxAlloc[i]) ** 2 * 10;
+        }
+        return scoreFn(alloc) + penalty;
+      };
+
+      if (!window.fmin || !window.fmin.nelderMead) {
+        throw new Error('Biblioteca fmin nao carregou (nelderMead indisponivel).');
+      }
+      const optRng = createRng(optSeed ?? 0);
+      const totalReq = localRequests.reduce((a, b) => a + b, 0) || 1;
+      const initial = localRequests.map(y => (y > 0 ? adjustedTotal * (y / totalReq) : 0));
+
+      const solveFromStart = (start) => {
+        const result = window.fmin.nelderMead(objective, start);
+        let alloc = result.x.map((v, i) => Math.round(v));
+        alloc = alloc.map((v, i) => Math.min(Math.max(v, minAlloc[i]), maxAlloc[i]));
+        alloc = repairAllocation(alloc, adjustedTotal, minAlloc, maxAlloc, scoreFn);
+        return { alloc, score: scoreFn(alloc) };
+      };
+
+      let best = solveFromStart(initial);
+      for (let s = 1; s < MULTI_STARTS; s++) {
+        const weights = Array.from({ length: n }, () => optRng());
+        const wsum = weights.reduce((a, b) => a + b, 0) || 1;
+        const start = weights.map(w => (w / wsum) * adjustedTotal);
+        const candidate = solveFromStart(start);
+        if (candidate.score + 1e-12 < best.score) best = candidate;
+      }
+
+      let exactGap = 0;
+      if (adjustedTotal <= EXACT_LIMIT) {
+        const exact = exactSearch(minAlloc, maxAlloc, adjustedTotal, scoreFn);
+        if (exact) {
+          exactGap = best.score - exact.score;
+        }
+      }
+
+      let finalWarning = warning;
+      if (exactGap > 1e-6) {
+        const gapMsg = `Gap exato ${exactGap.toFixed(4)} (ótimo inteiro melhor).`;
+        finalWarning = finalWarning ? `${finalWarning} ${gapMsg}` : gapMsg;
+      }
+
+      const violations = [];
+      for (let i = 0; i < n; i++) {
+        if (localRequests[i] > 0 && best.alloc[i] < 1) violations.push(i);
+      }
+      if (violations.length > 0) {
+        // Enforce hard constraint: requested departments must receive >= 1.
+        const fixed = best.alloc.map((v, i) => Math.max(v, minAlloc[i]));
+        const repaired = repairAllocation(fixed, adjustedTotal, minAlloc, maxAlloc, scoreFn);
+        best.alloc = repaired;
+        const msg = 'Correção: departamentos com solicitação > 0 não podem receber 0.';
+        finalWarning = finalWarning ? `${finalWarning} ${msg}` : msg;
+      }
+
+      return { alloc: best.alloc, adjustedTotal, warning: finalWarning };
+    }
+
+    function exactSearch(minAlloc, maxAlloc, target, scoreFn) {
+      const n = minAlloc.length;
+      const suffixMin = Array(n + 1).fill(0);
+      const suffixMax = Array(n + 1).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        suffixMin[i] = suffixMin[i + 1] + minAlloc[i];
+        suffixMax[i] = suffixMax[i + 1] + maxAlloc[i];
+      }
+
+      let bestScore = Infinity;
+      let bestAlloc = null;
+
+      function dfs(i, remaining, current) {
+        if (i === n) {
+          if (remaining === 0) {
+            const s = scoreFn(current);
+            if (s < bestScore) {
+              bestScore = s;
+              bestAlloc = current.slice();
+            }
+          }
+          return;
+        }
+
+        const minHere = minAlloc[i];
+        const maxHere = maxAlloc[i];
+        const minRest = suffixMin[i + 1];
+        const maxRest = suffixMax[i + 1];
+        const minVal = Math.max(minHere, remaining - maxRest);
+        const maxVal = Math.min(maxHere, remaining - minRest);
+        for (let v = minVal; v <= maxVal; v++) {
+          current[i] = v;
+          dfs(i + 1, remaining - v, current);
+        }
+      }
+
+      dfs(0, target, Array(n).fill(0));
+      if (bestAlloc === null) return null;
+      return { alloc: bestAlloc, score: bestScore };
+    }
+
+    function repairAllocation(alloc, target, minAlloc, maxAlloc, scoreFn) {
+      let current = alloc.slice();
+      let sum = current.reduce((a, b) => a + b, 0);
+
+      const canAdd = (i) => current[i] < maxAlloc[i];
+      const canRemove = (i) => current[i] > minAlloc[i];
+
+      while (sum < target) {
+        let bestIdx = -1;
+        let bestScore = Infinity;
+        for (let i = 0; i < current.length; i++) {
+          if (!canAdd(i)) continue;
+          const test = current.slice();
+          test[i] += 1;
+          const s = scoreFn(test);
+          if (s < bestScore) { bestScore = s; bestIdx = i; }
+        }
+        if (bestIdx === -1) break;
+        current[bestIdx] += 1;
+        sum += 1;
+      }
+
+      while (sum > target) {
+        let bestIdx = -1;
+        let bestScore = Infinity;
+        for (let i = 0; i < current.length; i++) {
+          if (!canRemove(i)) continue;
+          const test = current.slice();
+          test[i] -= 1;
+          const s = scoreFn(test);
+          if (s < bestScore) { bestScore = s; bestIdx = i; }
+        }
+        if (bestIdx === -1) break;
+        current[bestIdx] -= 1;
+        sum -= 1;
+      }
+
+      return localImprove(current, minAlloc, maxAlloc, scoreFn);
+    }
+
+    function localImprove(alloc, minAlloc, maxAlloc, scoreFn) {
+      let current = alloc.slice();
+      let improved = true;
+      while (improved) {
+        improved = false;
+        let best = scoreFn(current);
+        for (let i = 0; i < current.length; i++) {
+          if (current[i] <= minAlloc[i]) continue;
+          for (let j = 0; j < current.length; j++) {
+            if (i === j) continue;
+            if (current[j] >= maxAlloc[j]) continue;
+            const test = current.slice();
+            test[i] -= 1;
+            test[j] += 1;
+            const s = scoreFn(test);
+            if (s + 1e-9 < best) {
+              current = test;
+              best = s;
+              improved = true;
+            }
+          }
+        }
+      }
+      return current;
+    }
+
+    function buildOutput(semesters, deptNames, historyCount) {
+      const header = '        ' + deptNames.join('\t\t') + '\t\tStD\tStDA';
+      const lines = [header];
+      let cumAlloc = Array(deptNames.length).fill(0);
+      let cumReq = Array(deptNames.length).fill(0);
+
+      for (let idx = 0; idx < semesters.length; idx++) {
+        const sem = semesters[idx];
+        const row = sem.alloc.map((x, i) => {
+          const y = sem.req[i];
+          const ratio = y > 0 ? (x / y).toFixed(3) : 'N/A';
+          return `(${x}/${y})${ratio}`;
+        }).join('\t');
+
+        const ratios = [];
+        const ratiosSem = [];
+        for (let i = 0; i < deptNames.length; i++) {
+          if (sem.req[i] > 0) {
+            ratiosSem.push(sem.alloc[i] / sem.req[i]);
+          }
+          cumAlloc[i] += sem.alloc[i];
+          cumReq[i] += sem.req[i];
+          if (cumReq[i] > 0) ratios.push(cumAlloc[i] / cumReq[i]);
+        }
+
+        const sdSem = stdev(ratiosSem).toFixed(3);
+        const sdAcum = stdev(ratios).toFixed(3);
+        lines.push(`${sem.term}: ${row}\t${sdSem}\t${sdAcum}`);
+
+        if (historyCount && idx === historyCount - 1 && idx < semesters.length - 1) {
+          lines.push('-'.repeat(100));
+        }
+      }
+      return lines.join('\n');
+    }
+
+    function buildChartData(semesters, deptNames) {
+      const labels = semesters.map(s => s.term);
+      const colors = [
+        '#dc2626', '#f97316', '#facc15', '#22c55e', '#3b82f6'
+      ];
+
+      const perSemester = deptNames.map((name, idx) => {
+        return {
+          label: name,
+          borderColor: colors[idx % colors.length],
+          backgroundColor: colors[idx % colors.length],
+          tension: 0.25,
+          spanGaps: true,
+          pointRadius: 3,
+          data: semesters.map(sem => {
+            const x = sem.alloc[idx];
+            const y = sem.req[idx];
+            return {
+              x: sem.term,
+              y: y > 0 ? (x / y) : null,
+              frac: `${x}/${y}`
+            };
+          })
+        };
+      });
+
+      const cumAlloc = Array(deptNames.length).fill(0);
+      const cumReq = Array(deptNames.length).fill(0);
+
+      const cumulative = deptNames.map((name, idx) => {
+        return {
+          label: name,
+          borderColor: colors[idx % colors.length],
+          backgroundColor: colors[idx % colors.length],
+          tension: 0.25,
+          spanGaps: true,
+          pointRadius: 3,
+          data: semesters.map(sem => {
+            cumAlloc[idx] += sem.alloc[idx];
+            cumReq[idx] += sem.req[idx];
+            return {
+              x: sem.term,
+              y: sem.req[idx] > 0 ? (cumAlloc[idx] / cumReq[idx]) : null,
+              frac: `${cumAlloc[idx]}/${cumReq[idx]}`
+            };
+          })
+        };
+      });
+
+      return { labels, perSemester, cumulative };
+    }
+
+    function renderCharts(data, lastHistoryTerm) {
+      const tooltipCfg = {
+        callbacks: {
+          label: (ctx) => {
+            const frac = ctx.raw && ctx.raw.frac ? ctx.raw.frac : '0/0';
+            return `${ctx.dataset.label}: (${frac})`;
+          }
+        }
+      };
+      const annotationCfg = {
+        annotations: {
+          histLine: {
+            type: 'line',
+            xMin: lastHistoryTerm,
+            xMax: lastHistoryTerm,
+            borderColor: '#111827',
+            borderWidth: 1,
+            borderDash: [6, 6]
+          }
+        }
+      };
+
+      if (chartSem) chartSem.destroy();
+      if (chartCum) chartCum.destroy();
+
+      chartSem = new Chart(document.getElementById('chartSem'), {
+        type: 'line',
+        data: { labels: data.labels, datasets: data.perSemester },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'nearest', intersect: true },
+          plugins: { tooltip: tooltipCfg, annotation: annotationCfg },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      chartCum = new Chart(document.getElementById('chartCum'), {
+        type: 'line',
+        data: { labels: data.labels, datasets: data.cumulative },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'nearest', intersect: true },
+          plugins: { tooltip: tooltipCfg, annotation: annotationCfg },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    async function loadHistory() {
+      const res = await fetch(HIST_FILE);
+      if (!res.ok) throw new Error('Falha ao carregar o arquivo de histórico: historico_distribuicoes.txt');
+      const text = await res.text();
+      return parseHistory(text);
+    }
+
+    async function runSimulation() {
+      const warningEl = document.getElementById('warning');
+      warningEl.textContent = '';
+
+      const history = await loadHistory();
+      if (history.length === 0) return;
+
+      const deptNames = history[0].deptNames;
+      const { minReq, maxReq } = buildMinMaxRequests(history, deptNames);
+      const drnpaIdx = deptNames.indexOf('DRNPA');
+
+      const extra = parseInt(document.getElementById('extraSem').value, 10) || 0;
+      const bolsasMin = parseInt(document.getElementById('bolsasMin').value, 10) || 0;
+      const bolsasMax = parseInt(document.getElementById('bolsasMax').value, 10) || 0;
+      const drnpaMode = document.querySelector('input[name="drnpaMode"]:checked')?.value || 'random';
+      const simMode = document.querySelector('input[name="simMode"]:checked')?.value || 'acum';
+      const rng = createRng(currentSeed);
+
+      const semesters = history.map(s => ({ ...s, alloc: s.alloc.slice(), req: s.req.slice() }));
+      let lastTerm = semesters[semesters.length - 1].term;
+
+      let cumAlloc = Array(deptNames.length).fill(0);
+      let cumReq = Array(deptNames.length).fill(0);
+      semesters.forEach(sem => {
+        sem.alloc.forEach((x, i) => cumAlloc[i] += x);
+        sem.req.forEach((y, i) => cumReq[i] += y);
+      });
+
+      for (let s = 0; s < extra; s++) {
+        const term = nextTerm(lastTerm);
+        const requests = generateRequests(deptNames, minReq, maxReq, term, drnpaMode, rng);
+        const totalAvailable = randomInt(bolsasMin, bolsasMax, rng);
+        let fixedAlloc = null;
+        if (drnpaMode === '2|0' && drnpaIdx >= 0 && term.endsWith('/1')) {
+          fixedAlloc = Array(deptNames.length).fill(null);
+          fixedAlloc[drnpaIdx] = 2;
+        }
+
+        const result = minimizeAllocation({
+          requests,
+          totalAvailable,
+          cumAlloc,
+          cumReq,
+          deptNames,
+          term,
+          simMode,
+          optSeed: (currentSeed + (s + 1) * 10007) >>> 0,
+          fixedAlloc
+        });
+
+        if (result.warning) warningEl.textContent = result.warning;
+
+        const alloc = result.alloc;
+        semesters.push({ term, deptNames, alloc, req: requests, ratioTxt: [] });
+
+        alloc.forEach((x, i) => cumAlloc[i] += x);
+        requests.forEach((y, i) => cumReq[i] += y);
+
+        lastTerm = term;
+      }
+
+      const out = buildOutput(semesters, deptNames, history.length);
+      document.getElementById('output').textContent = out;
+
+      const chartData = buildChartData(semesters, deptNames);
+      const lastHistoryTerm = history[history.length - 1].term;
+      renderCharts(chartData, lastHistoryTerm);
+    }
+
+    let running = false;
+    let pending = false;
+    async function runSimulationSafe() {
+      if (running) {
+        pending = true;
+        return;
+      }
+      running = true;
+      try {
+        await runSimulation();
+      } catch (err) {
+        document.getElementById('output').textContent = err.message;
+      } finally {
+        running = false;
+        if (pending) {
+          pending = false;
+          runSimulationSafe();
+        }
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      currentSeed = Math.floor(Math.random() * 1e9);
+      runSimulationSafe();
+    });
+
+    const extraSemEl = document.getElementById('extraSem');
+    const extraSemValEl = document.getElementById('extraSemVal');
+    extraSemEl.addEventListener('input', () => {
+      extraSemValEl.textContent = extraSemEl.value;
+      runSimulationSafe();
+    });
+    extraSemValEl.textContent = extraSemEl.value;
+
+    document.querySelectorAll('input[name="drnpaMode"]').forEach(el => {
+      el.addEventListener('change', runSimulationSafe);
+    });
+
+    const bolsasMinEl = document.getElementById('bolsasMin');
+    const bolsasMaxEl = document.getElementById('bolsasMax');
+    function clampBolsasRange() {
+      let min = parseInt(bolsasMinEl.value, 10);
+      let max = parseInt(bolsasMaxEl.value, 10);
+      if (Number.isNaN(min)) min = 5;
+      if (Number.isNaN(max)) max = 5;
+      min = Math.min(Math.max(min, 5), 12);
+      max = Math.min(Math.max(max, 5), 30);
+      if (max < min) max = min;
+      bolsasMinEl.value = min;
+      bolsasMaxEl.value = max;
+    }
+    [bolsasMinEl, bolsasMaxEl].forEach(el => {
+      el.addEventListener('input', () => {
+        clampBolsasRange();
+        runSimulationSafe();
+      });
+      el.addEventListener('change', () => {
+        clampBolsasRange();
+        runSimulationSafe();
+      });
+    });
+
+    document.querySelectorAll('input[name="simMode"]').forEach(el => {
+      el.addEventListener('change', runSimulationSafe);
+    });
+
+    clampBolsasRange();
+    runSimulationSafe();
+  </script>
+</body>
+</html>
