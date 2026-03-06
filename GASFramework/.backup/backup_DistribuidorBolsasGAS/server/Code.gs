@@ -13,8 +13,6 @@ const DEFAULT_REPRESENTANTES = [
   { dept: 'DRNPA', nome: 'Representante DRNPA', emails: ['email@exemplo.com'] }
 ];
 
-const HIST_FILE = 'historico_distribuicoes.txt';
-
 const SHEET_REP = 'Representantes';
 const SHEET_DISC = 'Disciplinas';
 
@@ -205,7 +203,7 @@ function saveDisciplinesForDept_(ss, dept, disciplines, userEmail) {
 
 function validateDisciplines_(disciplines) {
   disciplines.forEach((d, idx) => {
-    const codeOk = /^\d{6}$/.test(String(d.codigo || ''));
+    const codeOk = /^\d{6,7}$/.test(String(d.codigo || ''));
     if (!codeOk) throw new Error('Código inválido na disciplina #' + (idx + 1));
     const ct = Number(d.ct);
     const cp = Number(d.cp);
