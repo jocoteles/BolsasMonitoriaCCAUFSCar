@@ -48,7 +48,7 @@
     .container {
       padding: 20px 32px 40px;
       display: grid;
-      gap: 16px;
+      gap: 32px;
     }
 
     .panel {
@@ -141,18 +141,79 @@
     }
 
     fieldset {
-      border: 1px solid var(--stroke);
+      border: 2px solid var(--stroke) !important;
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
       background: #fff;
+      display: block;
     }
 
     legend {
       font-weight: 700;
-      padding: 0 10px;
+      padding: 0 12px;
       color: var(--accent);
       font-size: 16px;
+      background: #fff;
+      border-radius: 4px;
+    }
+
+    .parameter-fieldsets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .parameter-fieldsets fieldset {
+      flex: 1;
+      min-width: 300px;
+      margin-bottom: 0;
+      background: #fdfaf5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .option-group label {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .radio-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      border: 1px solid var(--stroke);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .radio-item:hover {
+      border-color: var(--accent);
+      background: #f0f7f8;
+    }
+
+    .radio-item input {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .radio-item.active {
+      border-color: var(--accent);
+      background: #e6f0f1;
+      font-weight: 600;
     }
 
     .auto-save-status {
@@ -268,46 +329,49 @@
     <div class="panel">
       <h2>Parâmetros gerais</h2>
       <div class="row">
-        <div>
-          <label>Semestre</label>
-          <select id="semester-select">
-            <option value="odd">Ímpar</option>
-            <option value="even">Par</option>
-          </select>
-        </div>
-        <div>
+        <div style="flex: 1;">
           <label>Bolsas disponíveis</label>
-          <input type="number" id="total-bolsas" min="1" max="30" />
+          <input type="number" id="total-bolsas" min="1" max="30" style="width: 100%;" />
         </div>
-        <div>
+        <div style="flex: 1;">
           <label>Nº melhores distribuições</label>
-          <input type="number" id="n-melhores" min="1" max="10" />
+          <input type="number" id="n-melhores" min="1" max="10" style="width: 100%;" />
         </div>
-        <div class="row" style="margin-top: 12px;">
-          <div style="flex: 1;">
-            <label>Regra DRNPA</label>
-            <div class="row" style="gap: 15px;">
-              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
-                <input type="radio" name="drnpa-mode" value="random" checked /> DRNPA [X/Y]
+        <div class="parameter-fieldsets" style="margin-top: 20px;">
+          <fieldset>
+            <legend>Regra DRNPA</legend>
+            <div class="radio-buttons">
+              <label class="radio-item active" id="label-drnpa-random">
+                <input type="radio" name="drnpa-mode" value="random" checked />
+                <span>DRNPA irrestrito como os demais</span>
               </label>
-              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
-                <input type="radio" name="drnpa-mode" value="2|0" /> DRNPA [2/2|0]
+              <label class="radio-item" id="label-drnpa-2-impar">
+                <input type="radio" name="drnpa-mode" value="2_impar" />
+                <span>DRNPA é atendido com exatamente 2 bolsas (semestre ímpar)</span>
+              </label>
+              <label class="radio-item" id="label-drnpa-0-par">
+                <input type="radio" name="drnpa-mode" value="0_par" />
+                <span>DRNPA é atendido com exatamente 0 bolsas (semestre par)</span>
               </label>
             </div>
-          </div>
-          <div style="flex: 1;">
-            <label>Critério de Otimização</label>
-            <div class="row" style="gap: 15px;">
-              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
-                <input type="radio" name="opt-mode" value="stda" checked /> StDA (acumulado)
+          </fieldset>
+
+          <fieldset>
+            <legend>Critério de Otimização</legend>
+            <div class="radio-buttons">
+              <label class="radio-item active" id="label-opt-stda">
+                <input type="radio" name="opt-mode" value="stda" checked />
+                <span>StDA (acumulado)</span>
               </label>
-              <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
-                <input type="radio" name="opt-mode" value="std" /> StD (isolado)
+              <label class="radio-item" id="label-opt-std">
+                <input type="radio" name="opt-mode" value="std" />
+                <span>StD (isolado)</span>
               </label>
             </div>
-          </div>
+          </fieldset>
         </div>
-        <div class="summary" id="semester-hint" style="margin-top: 12px;"></div>
+        <div class="summary" id="semester-hint" style="margin-top: 12px; font-weight: 600; color: var(--accent-2);">
+        </div>
       </div>
 
       <div class="panel">
@@ -334,8 +398,6 @@
               respectivamente.</li>
             <li>Havendo menos bolsas do que solicitações, nenhuma das disciplinas aqui solicitadas deve ser optativa.
             </li>
-            <li>O DRNPA concentra as suas duas bolsas - que todos os departamentos possuem direito por ano - apenas nos
-              semestres ímpares, não fazendo solicitações nos semestres pares.</li>
           </ul>
         </div>
       </div>
@@ -346,7 +408,7 @@
         userEmail: '',
         userDept: null,
         departments: [],
-        settings: { semester: 'odd', totalBolsas: 12, nMelhores: 10 },
+        settings: { totalBolsas: 12, nMelhores: 10 },
         disciplinesByDept: {},
         activeDept: null,
         lastClassification: null,
@@ -383,16 +445,8 @@
         const totalBolsas = document.getElementById('total-bolsas');
         const nMelhores = document.getElementById('n-melhores');
 
-        semesterSelect.value = state.settings.semester || 'odd';
         totalBolsas.value = state.settings.totalBolsas || 12;
         nMelhores.value = state.settings.nMelhores || 10;
-
-        semesterSelect.onchange = function () {
-          state.settings.semester = semesterSelect.value;
-          renderDepartments();
-          updateSemesterHint();
-          triggerAutoSave();
-        };
 
         totalBolsas.oninput = function () {
           state.settings.totalBolsas = Number(totalBolsas.value || 0);
@@ -408,6 +462,7 @@
         drnpaRadios.forEach(r => {
           r.onchange = function () {
             state.drnpaMode = this.value;
+            updateRadioStyles();
             updateSemesterHint();
             triggerAutoSave();
           };
@@ -417,23 +472,41 @@
         optRadios.forEach(r => {
           r.onchange = function () {
             state.optMode = this.value;
+            updateRadioStyles();
             triggerAutoSave();
           };
         });
 
+        updateRadioStyles();
         updateSemesterHint();
+      }
+
+      function updateRadioStyles() {
+        const radios = ['drnpa-mode', 'opt-mode'];
+        radios.forEach(name => {
+          const inputs = document.querySelectorAll(`input[name="${name}"]`);
+          inputs.forEach(input => {
+            const label = input.closest('.radio-item');
+            if (input.checked) {
+              label.classList.add('active');
+            } else {
+              label.classList.remove('active');
+            }
+          });
+        });
       }
 
       function updateSemesterHint() {
         const hint = document.getElementById('semester-hint');
-        const isEven = state.settings.semester === 'even';
-        const drnpa2 = state.drnpaMode === '2|0';
+        const mode = state.drnpaMode;
 
-        let text = isEven ? 'Semestre par: DRNPA não participa das solicitações.' : 'Semestre ímpar: DRNPA participa.';
-        if (!isEven && drnpa2) {
-          text += ' (Regra 2/2|0: DRNPA recebe exatamente 2 bolsas)';
+        if (mode === '2_impar') {
+          hint.textContent = 'ℹ️ Regra 2 bolsas (ímpar) ativada: DRNPA recebe exatamente 2 bolsas.';
+        } else if (mode === '0_par') {
+          hint.textContent = '⚠️ Regra 0 bolsas (par) ativada: DRNPA não participa desta distribuição.';
+        } else {
+          hint.textContent = '';
         }
-        hint.textContent = text;
       }
 
       function renderDepartments() {
@@ -458,10 +531,10 @@
       }
 
       function getVisibleDepartments() {
-        const depts = state.settings.semester === 'even'
-          ? state.departments.filter(d => d !== 'DRNPA')
-          : state.departments.slice();
-        return depts;
+        if (state.drnpaMode === '0_par') {
+          return state.departments.filter(d => d !== 'DRNPA');
+        }
+        return state.departments.slice();
       }
 
       function renderDepartmentInFieldset(dept, container) {
@@ -523,7 +596,7 @@
 
           row.appendChild(wrapField('Código', code));
           row.appendChild(wrapField('Disciplina', disc));
-          row.appendChild(wrapField('Professor', prof));
+          row.appendChild(wrapField('Professor(a) ministrante', prof));
           row.appendChild(wrapField('CT', ct));
           row.appendChild(wrapField('CP', cp));
           row.appendChild(weight);
@@ -606,8 +679,8 @@
           if (isEmptyDiscipline(d)) {
             continue;
           }
-          if (!/^\d{6}$/.test(String(d.codigo || ''))) {
-            return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 dígitos.' };
+          if (!/^\d{6,7}$/.test(String(d.codigo || ''))) {
+            return { ok: false, error: 'Código inválido na disciplina #' + (i + 1) + '. Use 6 ou 7 dígitos.' };
           }
           const ct = Number(d.ct || 0);
           const cp = Number(d.cp || 0);
@@ -718,9 +791,29 @@
           showMessage('Gere a classificação antes de exportar o PDF.', true);
           return;
         }
-        google.script.run.withSuccessHandler(function (fileInfo) {
-          showMessage('PDF gerado: ' + fileInfo.name + ' (link disponível no Drive).');
-        }).withFailureHandler(showError).generatePdf(state.lastClassification);
+        const btn = this;
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Gerando PDF...';
+
+        google.script.run.withSuccessHandler(function (base64) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+
+          const fileName = 'Distribuicao_Bolsas_' + new Date().toISOString().slice(0, 10) + '.pdf';
+          const link = document.createElement('a');
+          link.href = 'data:application/pdf;base64,' + base64;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          showMessage('PDF gerado e enviado para download local.');
+        }).withFailureHandler(function (err) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          showError(err);
+        }).generatePdfAsBase64(state.lastClassification);
       };
 
       function renderResults() {

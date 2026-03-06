@@ -92,6 +92,17 @@ function generatePdf(classification) {
   return { url: file.getUrl(), name: fileName, id: file.getId() };
 }
 
+function generatePdfAsBase64(classification) {
+  if (!classification) {
+    throw new Error('Classificação não informada.');
+  }
+
+  const html = buildPdfHtml_(classification);
+  // Using a larger size to ensure better PDF quality if possible, though GAS PDF conversion is limited
+  const blob = HtmlService.createHtmlOutput(html).getBlob().getAs('application/pdf');
+  return Utilities.base64Encode(blob.getBytes());
+}
+
 // ----------------- Helpers -----------------
 
 function getSpreadsheet_() {
@@ -239,21 +250,20 @@ function computeDistributions_(departments, disciplinesByDept, settings) {
     };
   });
 
-  const semester = settings.semester === 'even' ? 'even' : 'odd';
   const totalBolsas = clampInt_(settings.totalBolsas, 1, 30);
   const nMelhores = clampInt_(settings.nMelhores, 1, 10);
   const drnpaMode = settings.drnpaMode || 'random';
   const optMode = settings.optMode || 'stda';
 
   let active = departments.filter(dept => requests[dept] > 0);
-  if (semester === 'even') {
+  if (drnpaMode === '0_par') {
     active = active.filter(dept => dept !== 'DRNPA');
   }
 
-  // Handle DRNPA 2/2|0 rule
+  // Handle DRNPA rules
   let adjustedTotal = totalBolsas;
   let fixedAlloc = {};
-  if (semester === 'odd' && drnpaMode === '2|0' && active.indexOf('DRNPA') >= 0) {
+  if (drnpaMode === '2_impar' && active.indexOf('DRNPA') >= 0) {
     fixedAlloc['DRNPA'] = 2;
     adjustedTotal -= 2;
     active = active.filter(dept => dept !== 'DRNPA');
